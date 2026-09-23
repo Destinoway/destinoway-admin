@@ -1,0 +1,1429 @@
+/* 🔥 Tailwind Setup */
+@import "tailwindcss";
+@tailwind utilities;
+
+/* 🔥 RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* REMOVE unwanted margin */
+body {
+  margin: 0;
+}
+
+/* 🔥 ROOT VARIABLES */
+:root {
+  --background: #f4fbfd;
+  --foreground: #171717;
+}
+
+/* 🔥 GLOBAL BODY */
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* ThemeContext ke liye */
+body.dark {
+  --background: #08161a;
+  --foreground: #ededed;
+}
+
+/* ========================= */
+/* 🔥 LOGIN PAGE STYLES */
+/* ========================= */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  background: var(--background);
+}
+
+/* LEFT PANEL */
+.login-left {
+  flex: 1;
+ background: linear-gradient(135deg, #BA611E 0%, #05144B 100%); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional overlay for premium look */
+.login-left::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.login-left-content {
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.login-left-content h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.login-left-content p {
+  margin-top: 16px;
+  opacity: 0.9;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.login-left-content ul {
+  margin-top: 24px;
+  padding-left: 18px;
+  line-height: 2;
+}
+
+/* RIGHT PANEL */
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+/* OPTIONS */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+/* FOOTER */
+.login-footer {
+  display: block;
+  margin-top: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+/* ========================= */
+/* MOBILE */
+/* ========================= */
+
+@media (max-width: 768px) {
+  .login-left {
+    display: none;
+  }
+
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-right {
+    padding: 24px;
+  }
+}
+
+/* ========================= */
+/* 🔥 SIDEBAR MENU FIX */
+/* ========================= */
+
+.ant-menu {
+  padding: 6px !important;
+  background: transparent !important;
+  border-inline-end: none !important;
+}
+
+.ant-menu-item,
+.ant-menu-submenu-title {
+  height: 48px !important;
+  line-height: 48px !important;
+  border-radius: 5px !important;
+  margin: 6px 0 !important;
+  padding: 0 14px !important;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.ant-menu-item .anticon,
+.ant-menu-submenu-title .anticon {
+  font-size: 18px;
+  transition: all 0.25s ease;
+}
+
+.ant-menu-title-content {
+  margin-left: 8px;
+}
+
+/* ========================= */
+/* LIGHT + DARK TEXT */
+/* ========================= */
+
+.ant-menu-dark,
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title,
+.ant-menu-dark .ant-menu-submenu-arrow {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* ========================= */
+/* HOVER */
+/* ========================= */
+
+.ant-menu-item,
+.ant-menu-submenu-title {
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* Normal Hover */
+.ant-menu-item:not(.ant-menu-item-selected):hover,
+.ant-menu-submenu-title:hover {
+  background: #27325c !important;
+  color: #fff !important;
+  border-radius: 5px;
+}
+
+/* Hover Icon */
+.ant-menu-item:not(.ant-menu-item-selected):hover .anticon,
+.ant-menu-submenu-title:hover .anticon {
+  color: #fff !important;
+}
+
+/* Hover Text */
+.ant-menu-item:not(.ant-menu-item-selected):hover .ant-menu-title-content,
+.ant-menu-submenu-title:hover .ant-menu-title-content {
+  color: #fff !important;
+}
+
+/* ========================= */
+/* ACTIVE MENU */
+/* ========================= */
+
+.ant-menu-item-selected {
+  background: #ba611e !important;
+
+  color: white !important;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover,
+.ant-menu-dark .ant-menu-submenu-title:hover {
+  color: white !important;
+}
+
+.ant-menu-dark .anticon {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ant-menu-item-selected .anticon {
+  color: white !important;
+}
+
+.ant-menu-submenu-open > .ant-menu-submenu-title {
+  background: rgba(255, 255, 255, 0.08) !important;
+
+  border-radius: 5px;
+}
+
+body.dark .ant-menu-item-selected {
+  background: linear-gradient(135deg, #05144b 100%, #ba611e 0%);
+
+  color: #fff !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* selected icon and text */
+
+.ant-menu-item-selected .anticon,
+.ant-menu-item-selected .ant-menu-title-content {
+  color: #fff !important;
+}
+
+/* ========================= */
+/* OPEN SUB MENU */
+/* ========================= */
+
+.ant-menu-submenu-open > .ant-menu-submenu-title {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #fff !important;
+}
+
+/* ========================= */
+/* COLLAPSED MENU */
+/* ========================= */
+
+.ant-menu-inline-collapsed .ant-menu-item {
+  padding-inline: calc(50% - 18px) !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item .anticon {
+  font-size: 18px;
+}
+/* ========================= */
+/* JODIT EDITOR - DARK MODE */
+/* ========================= */
+
+.jodit-dark .jodit-container {
+  background: #dae1ee !important;
+  border: 1px solid #374151 !important;
+}
+
+.jodit-dark .jodit-toolbar__box {
+  background: #1f2937 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.jodit-dark .jodit-wysiwyg {
+  background: #111827 !important;
+  color: #f9fafb !important;
+}
+
+.jodit-dark .jodit-status-bar {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+  border-top: 1px solid #374151 !important;
+}
+
+/* Toolbar buttons */
+.jodit-dark .jodit-toolbar-button {
+  color: #f9fafb !important;
+}
+
+.jodit-dark .jodit-toolbar-button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ========================= */
+/* JODIT EDITOR - LIGHT MODE */
+/* ========================= */
+
+.jodit-light .jodit-container {
+  background: #ffffff !important;
+  border: 1px solid #d9edf5 !important;
+}
+
+.jodit-light .jodit-toolbar__box {
+  background: #f8fcfd !important;
+  border-bottom: 1px solid #d9edf5 !important;
+}
+
+.jodit-light .jodit-wysiwyg {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.jodit-light .jodit-status-bar {
+  background: #f8fcfd !important;
+  color: #6b7280 !important;
+  border-top: 1px solid #d9edf5 !important;
+}
+
+.jodit-light .jodit-toolbar-button:hover {
+  background: rgba(114, 192, 240, 0.12) !important;
+}
+
+/* Sidebar Premium Scrollbar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+/* Chrome */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover */
+.sidebar-scroll:hover {
+  scrollbar-color: rgba(114, 192, 240, 0.35) transparent;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(114, 192, 240, 0.35);
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(114, 192, 240, 0.55);
+}
+.ant-input-lg,
+.ant-select-lg .ant-select-selector {
+  border-radius: 10px !important;
+}
+
+/* Home Content Accordion */
+
+.home-content-collapse .ant-collapse-item {
+  border-bottom: 1px dashed #d9d9d9 !important;
+}
+
+.dark .home-content-collapse .ant-collapse-item {
+  border-bottom: 1px dashed #404040 !important;
+}
+
+.home-content-collapse .ant-collapse-item:last-child {
+  border-bottom: none !important;
+}
+
+/* =========================================================
+   =========================================================
+   TIPTAP EDITOR
+   =========================================================
+   ========================================================= */
+
+/* =========================================================
+   ROOT VARIABLES
+   ========================================================= */
+
+:root {
+  --editor-bg: #ffffff;
+  --editor-text: #1f2937;
+  --editor-border: #d9edf5;
+  --editor-toolbar-bg: #f8fcfd;
+  --editor-toolbar-border: #d9edf5;
+  --editor-primary: #1677ff;
+  --editor-muted: #6b7280;
+  --editor-link: #1677ff;
+  --editor-code-bg: #f5f5f5;
+  --editor-selection: #e6f4ff;
+}
+
+/* =========================================================
+   DARK THEME VARIABLES
+   ========================================================= */
+
+[data-theme="dark"] {
+  --editor-bg: #141414;
+  --editor-text: #ffffff;
+  --editor-border: #434343;
+  --editor-toolbar-bg: #1f1f1f;
+  --editor-toolbar-border: #434343;
+  --editor-primary: #1677ff;
+  --editor-muted: #9ca3af;
+  --editor-link: #69b1ff;
+  --editor-code-bg: #1f1f1f;
+  --editor-selection: #1d3b5c;
+}
+
+/* =========================================================
+   EDITOR WRAPPER
+   ========================================================= */
+
+.tiptap-editor-wrapper {
+  width: 100%;
+  background: var(--editor-bg);
+  color: var(--editor-text);
+  border: 1px solid var(--editor-border);
+  border-radius: 6px;
+  overflow: hidden;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.tiptap-editor-toolbar {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+
+  background: var(--editor-toolbar-bg);
+  border-bottom: 1px solid var(--editor-toolbar-border);
+}
+
+.tiptap-editor-toolbar .ant-space {
+  margin-bottom: 0 !important;
+}
+
+/* Toolbar buttons */
+
+.tiptap-editor-toolbar .ant-btn {
+  color: var(--editor-text);
+  background: transparent;
+  border-color: var(--editor-border);
+}
+
+.tiptap-editor-toolbar .ant-btn:hover {
+  color: var(--editor-primary);
+  border-color: var(--editor-primary);
+}
+
+.tiptap-editor-toolbar .ant-btn-primary {
+  color: #ffffff;
+  background: var(--editor-primary);
+  border-color: var(--editor-primary);
+}
+
+/* Select */
+
+.tiptap-editor-toolbar .ant-select-selector {
+  background: var(--editor-bg) !important;
+  border-color: var(--editor-border) !important;
+}
+
+.tiptap-editor-toolbar .ant-select-selection-item {
+  color: var(--editor-text) !important;
+}
+
+.tiptap-editor-toolbar .ant-select-arrow {
+  color: var(--editor-muted);
+}
+
+/* Divider */
+
+.tiptap-editor-toolbar .ant-divider-vertical {
+  height: 24px;
+  margin: 0 2px;
+  border-inline-start-color: var(--editor-border);
+}
+
+/* =========================================================
+   VISUAL EDITOR CONTENT
+   ========================================================= */
+
+.tiptap-editor-content {
+  width: 100%;
+  min-height: 320px;
+
+  padding: 0;
+
+  background: var(--editor-bg);
+  color: var(--editor-text);
+
+  cursor: text;
+}
+
+/* ProseMirror */
+
+.tiptap-editor-content .ProseMirror {
+  min-height: 320px;
+
+  padding: 20px;
+
+  outline: none;
+
+  color: var(--editor-text);
+
+  font-size: 16px;
+  line-height: 1.8;
+
+  box-sizing: border-box;
+
+  caret-color: var(--editor-text);
+}
+
+.tiptap-editor-content .ProseMirror:focus {
+  outline: none;
+}
+
+/* =========================================================
+   PARAGRAPH
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror p {
+  margin: 0 0 12px;
+  color: var(--editor-text);
+}
+
+/* =========================================================
+   HEADINGS
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror h1,
+.tiptap-editor-content .ProseMirror h2,
+.tiptap-editor-content .ProseMirror h3,
+.tiptap-editor-content .ProseMirror h4,
+.tiptap-editor-content .ProseMirror h5,
+.tiptap-editor-content .ProseMirror h6 {
+  color: var(--editor-text);
+  font-weight: 600;
+}
+
+.tiptap-editor-content .ProseMirror h1 {
+  font-size: 2em;
+  line-height: 1.2;
+  margin: 0.67em 0;
+}
+
+.tiptap-editor-content .ProseMirror h2 {
+  font-size: 1.5em;
+  line-height: 1.3;
+  margin: 0.75em 0;
+}
+
+.tiptap-editor-content .ProseMirror h3 {
+  font-size: 1.25em;
+  line-height: 1.4;
+  margin: 0.83em 0;
+}
+
+.tiptap-editor-content .ProseMirror h4,
+.tiptap-editor-content .ProseMirror h5,
+.tiptap-editor-content .ProseMirror h6 {
+  line-height: 1.5;
+  margin: 1em 0 0.5em;
+}
+
+/* =========================================================
+   LISTS
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror ul,
+.tiptap-editor-content .ProseMirror ol {
+  padding-left: 28px;
+  margin: 10px 0 16px;
+  color: var(--editor-text);
+}
+
+.tiptap-editor-content .ProseMirror li {
+  color: var(--editor-text);
+}
+
+.tiptap-editor-content .ProseMirror li p {
+  margin-bottom: 4px;
+}
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror a {
+  color: var(--editor-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* =========================================================
+   BLOCKQUOTE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror blockquote {
+  border-left: 4px solid var(--editor-primary);
+
+  margin: 16px 0;
+  padding-left: 16px;
+
+  color: var(--editor-muted);
+}
+
+/* =========================================================
+   INLINE CODE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror code {
+  background: var(--editor-code-bg);
+  color: var(--editor-text);
+
+  border-radius: 4px;
+
+  padding: 2px 5px;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* =========================================================
+   CODE BLOCK
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror pre {
+  background: var(--editor-code-bg);
+  color: var(--editor-text);
+
+  border-radius: 6px;
+
+  padding: 16px;
+
+  overflow-x: auto;
+}
+
+.tiptap-editor-content .ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror img {
+  display: block;
+
+  max-width: 100%;
+  height: auto;
+
+  margin: 10px 0;
+
+  border-radius: 6px;
+}
+
+.tiptap-editor-content .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--editor-primary);
+}
+
+/* =========================================================
+   HORIZONTAL RULE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror hr {
+  border: 0;
+
+  border-top: 1px solid var(--editor-border);
+
+  margin: 24px 0;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror .tableWrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  margin: 18px 0;
+
+  padding-bottom: 4px;
+}
+
+.tiptap-editor-content .ProseMirror table {
+  width: 100%;
+
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  margin: 20px 0;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror td,
+.tiptap-editor-content .ProseMirror th {
+  position: relative;
+
+  min-width: 80px;
+
+  border: 1px solid var(--editor-border);
+
+  padding: 9px 12px;
+
+  color: var(--editor-text);
+  background: var(--editor-bg);
+
+  text-align: left;
+  vertical-align: top;
+
+  box-sizing: border-box;
+}
+
+.tiptap-editor-content .ProseMirror th {
+  background: var(--editor-toolbar-bg);
+  font-weight: 600;
+}
+
+/* Cell paragraphs */
+
+.tiptap-editor-content .ProseMirror th p,
+.tiptap-editor-content .ProseMirror td p {
+  margin: 0;
+  color: inherit;
+}
+
+/* =========================================================
+   TABLE SELECTED CELL
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror .selectedCell {
+  background: var(--editor-selection) !important;
+}
+
+.tiptap-editor-content .ProseMirror .selectedCell:after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background: var(--editor-selection);
+
+  opacity: 0.45;
+}
+
+/* =========================================================
+   TABLE RESIZE
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror .column-resize-handle {
+  position: absolute;
+
+  top: 0;
+  right: -2px;
+  bottom: 0;
+
+  width: 4px;
+
+  background: var(--editor-primary);
+
+  pointer-events: none;
+}
+
+.tiptap-editor-content .ProseMirror.resize-cursor,
+.tiptap-editor-content .ProseMirror .resize-cursor {
+  cursor: col-resize;
+}
+
+/* =========================================================
+   TABLE HOVER
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror td:hover,
+.tiptap-editor-content .ProseMirror th:hover {
+  border-color: var(--editor-primary);
+}
+
+/* =========================================================
+   PLACEHOLDER
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+
+  float: left;
+
+  height: 0;
+
+  color: var(--editor-muted);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   TEXT SELECTION
+   ========================================================= */
+
+.tiptap-editor-content .ProseMirror ::selection {
+  background: var(--editor-selection);
+}
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.tiptap-editor-wrapper:focus-within {
+  border-color: var(--editor-primary);
+}
+
+/* =========================================================
+   FULLSCREEN VISUAL EDITOR
+   ========================================================= */
+
+.tiptap-editor-content-fullscreen {
+  height: calc(85vh - 60px);
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  background: var(--editor-bg);
+}
+
+.tiptap-editor-content-fullscreen .ProseMirror {
+  min-height: calc(85vh - 120px);
+
+  padding: 0;
+
+  font-size: 18px;
+  line-height: 1.9;
+}
+
+/* =========================================================
+   FULLSCREEN SCROLLBAR
+   ========================================================= */
+
+.tiptap-editor-content-fullscreen::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tiptap-editor-content-fullscreen::-webkit-scrollbar-track {
+  background: var(--editor-bg);
+}
+
+.tiptap-editor-content-fullscreen::-webkit-scrollbar-thumb {
+  background: var(--editor-border);
+  border-radius: 10px;
+}
+
+.tiptap-editor-content-fullscreen::-webkit-scrollbar-thumb:hover {
+  background: var(--editor-muted);
+}
+
+/* =========================================================
+   HTML SOURCE EDITOR
+   ========================================================= */
+
+.tiptap-html-source {
+  width: 100%;
+  min-height: 320px;
+
+  background: var(--editor-bg);
+  color: var(--editor-text);
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   HTML SOURCE HEADER
+   ========================================================= */
+
+.tiptap-html-source-header {
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px;
+
+  box-sizing: border-box;
+
+  background: var(--editor-toolbar-bg);
+  color: var(--editor-text);
+
+  border-bottom: 1px solid var(--editor-border);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tiptap-html-source-title {
+  user-select: none;
+}
+
+/* =========================================================
+   FORMAT BUTTON
+   ========================================================= */
+
+.tiptap-html-format-button {
+  border: 1px solid var(--editor-border);
+
+  border-radius: 5px;
+
+  padding: 5px 10px;
+
+  background: var(--editor-bg);
+  color: var(--editor-text);
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.tiptap-html-format-button:hover {
+  color: var(--editor-primary);
+  border-color: var(--editor-primary);
+}
+
+/* =========================================================
+   CODEMIRROR
+   ========================================================= */
+
+.tiptap-html-source .cm-editor {
+  width: 100%;
+
+  background: var(--editor-bg);
+  color: var(--editor-text);
+}
+
+.tiptap-html-source .cm-scroller {
+  overflow: auto !important;
+
+  min-height: 278px;
+}
+
+.tiptap-html-source .cm-content {
+  caret-color: var(--editor-text);
+}
+
+.tiptap-html-source .cm-editor.cm-focused {
+  outline: none;
+}
+
+/* =========================================================
+   HTML SOURCE SCROLLBAR
+   ========================================================= */
+
+.tiptap-html-source .cm-scroller::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.tiptap-html-source .cm-scroller::-webkit-scrollbar-track {
+  background: var(--editor-bg);
+}
+
+.tiptap-html-source .cm-scroller::-webkit-scrollbar-thumb {
+  background: var(--editor-border);
+
+  border-radius: 10px;
+}
+
+.tiptap-html-source .cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--editor-muted);
+}
+
+/* =========================================================
+   FULLSCREEN HTML SOURCE
+   ========================================================= */
+
+.tiptap-html-source-fullscreen {
+  height: calc(85vh - 60px);
+
+  overflow: hidden;
+
+  background: var(--editor-bg);
+}
+
+.tiptap-html-source-fullscreen .cm-editor {
+  height: calc(85vh - 102px);
+}
+
+.tiptap-html-source-fullscreen .cm-scroller {
+  height: calc(85vh - 102px);
+
+  overflow: auto !important;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.ant-modal .tiptap-editor-wrapper {
+  border: 0;
+  border-radius: 0;
+}
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+[data-theme="dark"] .tiptap-editor-content .ProseMirror {
+  color: var(--editor-text);
+}
+
+/* =========================================================
+   =========================================================
+   CKEDITOR
+   =========================================================
+   ========================================================= */
+
+/* =========================================================
+   WRAPPER
+   ========================================================= */
+
+.cms-ckeditor-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.cms-ckeditor-wrapper .ck-editor {
+  width: 100%;
+}
+
+/* =========================================================
+   CKEDITOR EDITABLE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-editor__editable {
+  min-height: 350px;
+  max-height: 650px;
+
+  padding: 20px 24px !important;
+
+  font-size: 16px;
+  line-height: 1.8;
+
+  overflow-y: auto;
+}
+
+/* =========================================================
+   CKEDITOR CONTENT
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content {
+  min-height: 350px;
+}
+
+/* Paragraph */
+
+.cms-ckeditor-wrapper .ck-content p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+/* =========================================================
+   HEADINGS
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content h1,
+.cms-ckeditor-wrapper .ck-content h2,
+.cms-ckeditor-wrapper .ck-content h3,
+.cms-ckeditor-wrapper .ck-content h4,
+.cms-ckeditor-wrapper .ck-content h5,
+.cms-ckeditor-wrapper .ck-content h6 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.cms-ckeditor-wrapper .ck-content h1 {
+  font-size: 2em;
+}
+
+.cms-ckeditor-wrapper .ck-content h2 {
+  font-size: 1.5em;
+}
+
+.cms-ckeditor-wrapper .ck-content h3 {
+  font-size: 1.25em;
+}
+
+/* =========================================================
+   LISTS
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content ul,
+.cms-ckeditor-wrapper .ck-content ol {
+  padding-left: 28px;
+}
+
+.cms-ckeditor-wrapper .ck-content li {
+  margin-bottom: 4px;
+}
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content a {
+  color: #1677ff;
+  text-decoration: underline;
+}
+
+/* =========================================================
+   BLOCKQUOTE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content blockquote {
+  border-left: 4px solid #1677ff;
+
+  margin: 16px 0;
+
+  padding-left: 16px;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.cms-ckeditor-wrapper .ck-content table td,
+.cms-ckeditor-wrapper .ck-content table th {
+  min-width: 60px;
+
+  padding: 8px 10px;
+
+  border: 1px solid #d9d9d9;
+}
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content code {
+  padding: 2px 5px;
+
+  border-radius: 4px;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.cms-ckeditor-wrapper .ck-content pre {
+  overflow-x: auto;
+
+  padding: 16px;
+
+  border-radius: 6px;
+}
+
+/* =========================================================
+   CKEDITOR TOOLBAR
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-toolbar {
+  border-radius: 6px 6px 0 0;
+}
+
+/* =========================================================
+   CKEDITOR SOURCE EDITOR
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-source-editing-area {
+  min-height: 500px;
+}
+
+.cms-ckeditor-wrapper .ck-source-editing-area textarea {
+  width: 100%;
+
+  min-height: 500px;
+
+  resize: vertical;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   CKEDITOR SOURCE MODE
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-source-editing-area {
+  background: var(--editor-bg);
+}
+
+/* =========================================================
+   CKEDITOR DARK THEME
+   ========================================================= */
+
+[data-theme="dark"] .cms-ckeditor-wrapper .ck-editor {
+  --ck-color-base-background: #141414;
+  --ck-color-base-foreground: #1f1f1f;
+  --ck-color-base-border: #434343;
+
+  --ck-color-toolbar-background: #1f1f1f;
+  --ck-color-toolbar-border: #434343;
+
+  --ck-color-text: #ffffff;
+
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: #303030;
+  --ck-color-button-default-active-background: #303030;
+
+  --ck-color-button-on-background: #1677ff;
+
+  --ck-color-input-background: #141414;
+  --ck-color-input-border: #434343;
+
+  --ck-color-dropdown-panel-background: #1f1f1f;
+  --ck-color-dropdown-panel-border: #434343;
+
+  --ck-color-list-background: #1f1f1f;
+
+  --ck-color-button-action-background: #1677ff;
+  --ck-color-button-action-text: #ffffff;
+}
+
+/* Dark editor content */
+
+[data-theme="dark"] .cms-ckeditor-wrapper .ck-editor__editable {
+  background: #141414;
+
+  color: #ffffff;
+}
+
+/* Dark links */
+
+[data-theme="dark"] .cms-ckeditor-wrapper .ck-content a {
+  color: #69b1ff;
+}
+
+/* Dark source */
+
+[data-theme="dark"] .cms-ckeditor-wrapper .ck-source-editing-area {
+  background: #141414;
+
+  color: #ffffff;
+}
+
+[data-theme="dark"] .cms-ckeditor-wrapper .ck-source-editing-area textarea {
+  background: #141414;
+
+  color: #ffffff;
+
+  border-color: #434343;
+}
+
+/* =========================================================
+   CKEDITOR LIGHT THEME
+   ========================================================= */
+
+[data-theme="light"] .cms-ckeditor-wrapper .ck-editor {
+  --ck-color-base-background: #ffffff;
+  --ck-color-base-foreground: #ffffff;
+  --ck-color-base-border: #d9d9d9;
+
+  --ck-color-toolbar-background: #ffffff;
+  --ck-color-toolbar-border: #d9d9d9;
+
+  --ck-color-text: #1f1f1f;
+
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: #f5f5f5;
+  --ck-color-button-default-active-background: #e6f4ff;
+
+  --ck-color-button-on-background: #1677ff;
+
+  --ck-color-input-background: #ffffff;
+  --ck-color-input-border: #d9d9d9;
+
+  --ck-color-dropdown-panel-background: #ffffff;
+  --ck-color-dropdown-panel-border: #d9d9d9;
+
+  --ck-color-list-background: #ffffff;
+}
+
+/* Light editor content */
+
+[data-theme="light"] .cms-ckeditor-wrapper .ck-editor__editable {
+  background: #ffffff;
+
+  color: #1f1f1f;
+}
+
+/* Light source */
+
+[data-theme="light"] .cms-ckeditor-wrapper .ck-source-editing-area {
+  background: #ffffff;
+
+  color: #1f1f1f;
+}
+
+[data-theme="light"] .cms-ckeditor-wrapper .ck-source-editing-area textarea {
+  background: #ffffff;
+
+  color: #1f1f1f;
+
+  border-color: #d9d9d9;
+}
+
+/* =========================================================
+   CKEDITOR FULL WIDTH CONTENT
+   ========================================================= */
+
+.cms-ckeditor-wrapper .ck-content iframe {
+  max-width: 100%;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .tiptap-editor-toolbar {
+    padding: 8px;
+  }
+
+  .tiptap-editor-content .ProseMirror {
+    padding: 14px;
+
+    font-size: 15px;
+  }
+
+  .tiptap-editor-content-fullscreen {
+    padding: 18px;
+  }
+
+  .tiptap-editor-content-fullscreen .ProseMirror {
+    font-size: 16px;
+  }
+
+  .cms-ckeditor-wrapper .ck-editor__editable {
+    min-height: 300px;
+    max-height: 550px;
+
+    padding: 16px !important;
+
+    font-size: 15px;
+  }
+
+  .cms-ckeditor-wrapper .ck-content {
+    min-height: 300px;
+  }
+}
