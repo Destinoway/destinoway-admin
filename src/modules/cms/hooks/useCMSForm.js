@@ -27,8 +27,7 @@ export default function useCMSForm({ id, form }) {
           ...page,
           blogMeta: {
             ...page?.blogMeta,
-            featuredImage:
-              page?.featuredImage ?? page?.blogMeta?.featuredImage,
+            featuredImage: page?.featuredImage ?? page?.blogMeta?.featuredImage,
           },
           keywords: page?.keywords?.join(", "),
           cityMeta: page?.data?.cityMeta,
@@ -98,18 +97,53 @@ export default function useCMSForm({ id, form }) {
 
   const handleSubmit = async (values) => {
     const formValues = form.getFieldsValue(true);
+
+    if (formValues.entityType === "hotelCity") {
+      const c = formValues.cityMeta;
+      const hasCoords =
+        (c?.coordinates?.lat ?? c?.latitude) != null &&
+        (c?.coordinates?.long ?? c?.longitude) != null;
+      if (!c?.destination || !c?.destinationId || !hasCoords) {
+        message.warning(
+          "City name, destination ID and coordinates are required",
+        );
+        return;
+      }
+    }
+
+    if (formValues.entityType === "hotel") {
+      if (!formValues.cityMeta?.destination || !formValues.entityId) {
+        message.warning("City and hotel selection are required");
+        return;
+      }
+    }
+
+    if (formValues.slug?.trim()) {
+      try {
+        const existing = await getCMSPageBySlugApi(formValues.slug.trim());
+        if (existing && (existing._id || existing.id) !== id) {
+          message.warning(
+            `Slug "${formValues.slug.trim()}" already exists. Please change it.`,
+          );
+          return;
+        }
+      } catch {
+        // slug not found: safe to save
+      }
+    }
+
     try {
       const payload = {
         title: formValues.title,
         ...(formValues.slug?.trim() && { slug: formValues.slug.trim() }),
         entityType: formValues.entityType,
         description: formValues.description,
-      featuredImage: formValues?.blogMeta?.featuredImage,
+        featuredImage: formValues?.blogMeta?.featuredImage,
         entityId: formValues.entityId,
         metaTitle: formValues.metaTitle,
         metaDescription: formValues.metaDescription,
         isPublished: formValues.isPublished,
-         categoryId: formValues.categoryId,
+        categoryId: formValues.categoryId,
         keywords:
           formValues?.keywords?.split(",")?.map((item) => item.trim()) || [],
         data: {
