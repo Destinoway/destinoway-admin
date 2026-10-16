@@ -1,5 +1,4 @@
 import api from "@/services/api";
-import dayjs from "dayjs";
 
 export const createMarkupApi = async (data) => {
   const res = await api.post("/markup/createMarkup", data, {
@@ -95,47 +94,67 @@ export const getCitiesHotelsApi = async (searchText = "") => {
   return response?.data?.data || [];
 };
 
-export const searchCMSHotelsApi = async ({
-  search = "",
-  city = "",
-  state = "",
-  country = "",
-  page = 1,
-  limit = 20,
+export const startCMSHotelSearchApi = async ({
+  locationId,
+  geoCode,
+  checkIn,
+  checkOut,
+  rooms,
+  destinationCountryCode,
 }) => {
   const response = await api.post(
-    "/HotelSearch/search",
+    "/hotelSearch/search",
     {
-      checkIn: dayjs().format("MM-DD-YYYY"),
-      checkOut: dayjs().add(1, "day").format("MM-DD-YYYY"),
-      destination: {
-        type: "hotel",
-        city,
-        state,
-        country,
-      },
-      facility: "",
-      limit,
-      maxPrice: "",
-      minPrice: "",
-      page,
-      rooms: [
-        {
-          adults: 1,
-          children: [],
-        },
-      ],
-      search: search?.trim() || "",
-      sortBy: "",
-      sortOrder: "",
-      starCategory: "",
+      locationId,
+      geoCode,
+      checkIn,
+      checkOut,
+      rooms,
+      destinationCountryCode,
     },
     {
       skipToast: true,
     },
   );
 
-  return response?.data || {};
+  const body = response?.data;
+  const searchId = body?.message?.searchId || body?.data?.searchId;
+  if (body?.success !== true || !searchId) {
+    throw new Error(body?.message || "Hotel search could not be started.");
+  }
+
+  return {
+    searchId,
+    searchSessionId: body?.message?.searchSessionId,
+    supplier: body?.message?.supplier,
+    status: body?.message?.status || "processing",
+  };
+};
+
+export const getCMSHotelSearchResultsApi = async ({
+  searchId,
+  page = 1,
+  limit = 5000,
+  hotelName = "",
+}) => {
+  const response = await api.get(
+    `/hotelSearch/search/${encodeURIComponent(searchId)}`,
+    {
+      params: {
+        page,
+        limit,
+        ...(hotelName.trim() && { hotelName: hotelName.trim() }),
+      },
+      skipToast: true,
+    },
+  );
+
+  const body = response?.data;
+  if (body?.success !== true || !body?.data || typeof body.data !== "object") {
+    throw new Error(body?.message || "Hotel search results could not be loaded.");
+  }
+
+  return body.data;
 };
 // ================= CREATE TAX =================
 

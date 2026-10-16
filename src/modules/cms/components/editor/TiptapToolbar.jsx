@@ -1660,26 +1660,26 @@
 "use client";
 
 import {
-  AlignCenterOutlined,
-  AlignLeftOutlined,
-  AlignRightOutlined,
-  BoldOutlined,
-  ClearOutlined,
-  CodeOutlined,
-  FontColorsOutlined,
-  FullscreenOutlined,
-  HighlightOutlined,
-  ItalicOutlined,
-  LinkOutlined,
-  MinusOutlined,
-  OrderedListOutlined,
-  PictureOutlined,
-  RedoOutlined,
-  StrikethroughOutlined,
-  TableOutlined,
-  UnderlineOutlined,
-  UndoOutlined,
-  UnorderedListOutlined,
+    AlignCenterOutlined,
+    AlignLeftOutlined,
+    AlignRightOutlined,
+    BoldOutlined,
+    ClearOutlined,
+    CodeOutlined,
+    FontColorsOutlined,
+    FullscreenOutlined,
+    HighlightOutlined,
+    ItalicOutlined,
+    LinkOutlined,
+    MinusOutlined,
+    OrderedListOutlined,
+    PictureOutlined,
+    RedoOutlined,
+    StrikethroughOutlined,
+    TableOutlined,
+    UnderlineOutlined,
+    UndoOutlined,
+    UnorderedListOutlined,
 } from "@ant-design/icons";
 
 import { Button, Divider, Dropdown, Select, Space, Tooltip } from "antd";
@@ -2415,7 +2415,7 @@ export default function TiptapToolbar({
           type={editor.isActive("blockquote") ? "primary" : "default"}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
-          "
+          &quot;
         </Button>
       </Tooltip>
 

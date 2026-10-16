@@ -55,9 +55,15 @@ export default function CMSListPage() {
     >
       <CMSFilters
         search={search}
-        setSearch={setSearch}
+        setSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
         entityType={entityType}
-        setEntityType={setEntityType}
+        setEntityType={(value) => {
+          setEntityType(value);
+          setPage(1);
+        }}
       />
 
       {canFetch ? (

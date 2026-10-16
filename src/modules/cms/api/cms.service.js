@@ -24,6 +24,14 @@ export const getCMSPageApi = async (id) => {
   return res?.data?.data || null;
 };
 
+export const getCMSPageBySlugApi = async (slug) => {
+  const res = await api.get(`/cms/page/${encodeURIComponent(slug)}`, {
+    skipToast: true,
+  });
+
+  return res?.data?.data || null;
+};
+
 /*
 CREATE
 */

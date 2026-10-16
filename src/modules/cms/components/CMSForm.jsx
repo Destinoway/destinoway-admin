@@ -4,23 +4,24 @@ import { useMasterData } from "@/modules/master-data/hooks/useMasterData";
 import { usePermission } from "@/modules/shared/hooks/usePermission";
 import { CopyOutlined } from "@ant-design/icons";
 import {
-  App,
-  Button,
-  Card,
-  Col,
-  Form,
-  Input,
-  Row,
-  Select,
-  Space,
-  Switch,
-  Tooltip,
-  theme,
+    App,
+    Button,
+    Card,
+    Col,
+    Form,
+    Input,
+    Row,
+    Select,
+    Space,
+    Switch,
+    Tooltip,
+    theme,
 } from "antd";
 import Text from "antd/es/typography/Text";
 import { debounce } from "lodash";
 import { useEffect, useMemo } from "react";
 import useCMSForm from "../hooks/useCMSForm";
+import { buildFrontendUrl } from "../utils/cmsUrl";
 import ImageUpload from "./../../shared/imageUpload/ImageUpload"; // apne path ke hisab se
 import CMSBlocksBuilder from "./CMSBlocksBuilder";
 import CMSSeoFields from "./CMSSeoFields";
@@ -41,6 +42,8 @@ export default function CMSForm({ id }) {
   console.log("CMSForm masterData", masterData);
 
   const title = Form.useWatch("title", form);
+  const slug = Form.useWatch("slug", form);
+  const entityId = Form.useWatch("entityId", form);
   const hotelMeta = Form.useWatch(["data", "hotelMeta"], form);
   const cityMeta = Form.useWatch("cityMeta", form);
 
@@ -94,7 +97,7 @@ export default function CMSForm({ id }) {
         debouncedPreview();
       }
     }
-  }, [entityType, title, cityMeta, hotelMeta, id]);
+  }, [entityType, title, cityMeta, hotelMeta, id, debouncedPreview]);
 
   /*
     PREVIEW
@@ -112,25 +115,48 @@ export default function CMSForm({ id }) {
       return;
     }
 
-    const frontendUrl = (
-      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000"
-    ).replace(/\/+$/, "");
-
-    window.open(`${frontendUrl}${values.url}?preview=true`, "_blank");
+    window.open(
+      buildFrontendUrl(values.url, { preview: true }),
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
-  // const slug = Form.useWatch("slug", form);
-
   const url = Form.useWatch("url", form);
+
+  const handleSlugChange = (event) => {
+    const nextSlug = event.target.value
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    let nextUrl = `/${nextSlug}`;
+    if (entityType === "hotelCity") {
+      nextUrl = `/hotels/${nextSlug}`;
+    } else if (entityType === "hotel") {
+      const citySlug = (cityMeta?.destination || "")
+        .split(",")[0]
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, "and")
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      nextUrl = `/hotel-details/${citySlug}/${nextSlug}?hid=${entityId || ""}`;
+    }
+
+    form.setFieldsValue({ slug: nextSlug, url: nextUrl });
+  };
 
   const handleCopySlug = async () => {
     if (!url) return;
 
-    const baseUrl = (
-      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000"
-    ).replace(/\/+$/, "");
-
-    await navigator.clipboard.writeText(`${baseUrl}${url}`);
+    await navigator.clipboard.writeText(buildFrontendUrl(url));
 
     message.success("URL copied successfully");
   };
@@ -196,10 +222,6 @@ export default function CMSForm({ id }) {
                     label: "Hotel Pages",
                   },
                   {
-                    value: "marketing",
-                    label: "Marketing",
-                  },
-                  {
                     value: "blog",
                     label: "Blogs",
                   },
@@ -249,8 +271,21 @@ export default function CMSForm({ id }) {
                 </Form.Item>
               </Col>
 
-              <Col xs={24} md={12}>
-                <Form.Item label={<span className="font-bold">Slug</span>}>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  name="slug"
+                  label={<span className="font-bold">Slug</span>}
+                >
+                  <Input
+                    size="large"
+                    onChange={handleSlugChange}
+                    placeholder="Auto generated"
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={6}>
+                <Form.Item label={<span className="font-bold">Public URL</span>}>
                   <div
                     style={{
                       display: "flex",
@@ -283,12 +318,14 @@ export default function CMSForm({ id }) {
               </Col>
             </Row>
 
-            {entityType === "hotelCity" && <CMSCitySelector form={form} />}
+            {entityType === "hotelCity" && (
+              <CMSCitySelector form={form} entityType={entityType} />
+            )}
 
             {entityType === "hotel" && (
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <CMSCitySelector form={form} />
+                  <CMSCitySelector form={form} entityType={entityType} />
                 </Col>
 
                 <Col xs={24} md={12}>

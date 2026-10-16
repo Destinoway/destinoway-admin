@@ -2,14 +2,18 @@
 
 import { App } from "antd";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { getCMSPageApi, previewSlugApi } from "../api/cms.service";
+import { useCallback, useEffect } from "react";
+import {
+  getCMSPageApi,
+  getCMSPageBySlugApi,
+  previewSlugApi,
+} from "../api/cms.service";
 import { useCMS } from "./useCMS";
 
 export default function useCMSForm({ id, form }) {
   const router = useRouter();
   const { message } = App.useApp();
-const { createCMS, updateCMS } = useCMS({}, false);
+  const { createCMS, updateCMS } = useCMS({}, false);
 
   useEffect(() => {
     if (!id) return;
@@ -21,12 +25,20 @@ const { createCMS, updateCMS } = useCMS({}, false);
         console.log("use cms page", page);
         form.setFieldsValue({
           ...page,
+          blogMeta: {
+            ...page?.blogMeta,
+            featuredImage:
+              page?.featuredImage ?? page?.blogMeta?.featuredImage,
+          },
           keywords: page?.keywords?.join(", "),
           cityMeta: page?.data?.cityMeta,
 
           selectedCity: page?.data?.cityMeta?.destinationId || page?.entityId,
 
-          selectedHotel: page?.data?.hotelMeta?.hotelId || page?.entityId,
+          selectedHotel:
+            page?.data?.hotelMeta?.supplierHotelId ||
+            page?.data?.hotelMeta?.hotelId ||
+            page?.entityId,
 
           data: page?.data,
 
@@ -39,9 +51,9 @@ const { createCMS, updateCMS } = useCMS({}, false);
     };
 
     load();
-  }, [id, form]);
+  }, [id, form, message]);
 
-  const previewSlug = async () => {
+  const previewSlug = useCallback(async () => {
     const values = form.getFieldsValue(true);
 
     // Static / Marketing
@@ -82,13 +94,14 @@ const { createCMS, updateCMS } = useCMS({}, false);
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [form]);
 
   const handleSubmit = async (values) => {
     const formValues = form.getFieldsValue(true);
     try {
       const payload = {
         title: formValues.title,
+        ...(formValues.slug?.trim() && { slug: formValues.slug.trim() }),
         entityType: formValues.entityType,
         description: formValues.description,
       featuredImage: formValues?.blogMeta?.featuredImage,
@@ -105,15 +118,19 @@ const { createCMS, updateCMS } = useCMS({}, false);
         },
       };
 
+      let savedPage;
       if (id) {
-        await updateCMS.mutateAsync({
+        const response = await updateCMS.mutateAsync({
           id,
           data: payload,
         });
-
+        savedPage = response?.data?.data;
+        await verifyPublishedPage(savedPage);
         router.push("/dashboard/cms/pages");
       } else {
-        await createCMS.mutateAsync(payload);
+        const response = await createCMS.mutateAsync(payload);
+        savedPage = response?.data?.data;
+        await verifyPublishedPage(savedPage);
 
         form.resetFields();
 
@@ -126,6 +143,20 @@ const { createCMS, updateCMS } = useCMS({}, false);
       console.log(err);
     }
   };
+
+  const verifyPublishedPage = async (page) => {
+    if (!page?.isPublished || !page?.slug) return;
+
+    try {
+      const publicPage = await getCMSPageBySlugApi(page.slug);
+      if (publicPage?.slug !== page.slug) {
+        message.warning("Saved, but public CMS verification did not match.");
+      }
+    } catch {
+      message.warning("Saved, but public CMS verification could not complete.");
+    }
+  };
+
   return {
     handleSubmit,
     previewSlug,
