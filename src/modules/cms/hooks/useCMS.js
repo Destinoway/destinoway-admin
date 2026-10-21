@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createCMSPageApi,
-  deleteCMSPageApi,
-  getCMSPagesApi,
-  updateCMSPageApi,
+    createCMSPageApi,
+    deleteCMSPageApi,
+    getCMSPagesApi,
+    updateCMSPageApi,
 } from "../api/cms.service";
 
 export const useCMS = (params = {}, enabled = true) => {
@@ -16,7 +16,7 @@ export const useCMS = (params = {}, enabled = true) => {
     queryKey: ["cmsPages", params],
     queryFn: () => getCMSPagesApi(params),
     enabled,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   /*

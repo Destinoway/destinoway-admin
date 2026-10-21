@@ -14,40 +14,16 @@ export default function HtmlSourceEditor({
   darkMode = false,
   fullscreen = false,
 }) {
-  /*
-   * =====================================================
-   * LOCAL VALUE
-   *
-   * IMPORTANT:
-   * CodeMirror is controlled by LOCAL state.
-   *
-   * This prevents the parent React component from
-   * resetting the cursor on every keystroke.
-   * =====================================================
-   */
+
 
   const [localValue, setLocalValue] = useState(value || "");
 
   const lastExternalValue = useRef(value || "");
 
-  /*
-   * =====================================================
-   * SYNC EXTERNAL VALUE
-   *
-   * Only update local editor when the value actually
-   * comes from outside.
-   *
-   * Normal typing will NOT trigger this.
-   * =====================================================
-   */
 
   useEffect(() => {
     const incomingValue = value || "";
 
-    /*
-     * If this value is already the value
-     * we are editing locally, do nothing.
-     */
 
     if (incomingValue === localValue) {
       lastExternalValue.current = incomingValue;
@@ -55,26 +31,15 @@ export default function HtmlSourceEditor({
       return;
     }
 
-    /*
-     * External change:
-     *
-     * - Visual -> HTML
-     * - Loading another CMS content
-     * - Reset
-     */
+
 
     if (incomingValue !== lastExternalValue.current) {
       setLocalValue(incomingValue);
 
       lastExternalValue.current = incomingValue;
     }
-  }, [value]);
+  }, [value, localValue]);
 
-  /*
-   * =====================================================
-   * EDITOR THEME
-   * =====================================================
-   */
 
   const customTheme = useMemo(() => {
     return EditorView.theme({
@@ -145,26 +110,10 @@ export default function HtmlSourceEditor({
     });
   }, [fullscreen]);
 
-  /*
-   * =====================================================
-   * EXTENSIONS
-   * =====================================================
-   */
 
   const extensions = useMemo(() => {
     return [html(), EditorView.lineWrapping, customTheme];
   }, [customTheme]);
-
-  /*
-   * =====================================================
-   * HANDLE CHANGE
-   *
-   * First update LOCAL state.
-   * Then notify parent.
-   *
-   * This is important for cursor stability.
-   * =====================================================
-   */
 
   const handleChange = (newValue) => {
     setLocalValue(newValue);
@@ -174,16 +123,6 @@ export default function HtmlSourceEditor({
     onChange?.(newValue);
   };
 
-  /*
-   * =====================================================
-   * FORMAT HTML
-   *
-   * Formatting is ONLY done when user clicks
-   * Format HTML.
-   *
-   * Never format inside onChange.
-   * =====================================================
-   */
 
   const formatHtml = async () => {
     try {
@@ -217,9 +156,6 @@ export default function HtmlSourceEditor({
         bracketSameLine: false,
       });
 
-      /*
-       * Update local editor only once.
-       */
 
       setLocalValue(formatted);
 
@@ -231,19 +167,9 @@ export default function HtmlSourceEditor({
     }
   };
 
-  /*
-   * =====================================================
-   * HEIGHT
-   * =====================================================
-   */
 
   const editorHeight = fullscreen ? "calc(85vh - 102px)" : "278px";
 
-  /*
-   * =====================================================
-   * RETURN
-   * =====================================================
-   */
 
   return (
     <div
@@ -253,9 +179,7 @@ export default function HtmlSourceEditor({
           : "tiptap-html-source"
       }
     >
-      {/* ================================================
-          SOURCE HEADER
-      ================================================ */}
+  
 
       <div className="tiptap-html-source-header">
         <span className="tiptap-html-source-title">HTML Source</span>
@@ -276,9 +200,6 @@ export default function HtmlSourceEditor({
         </button>
       </div>
 
-      {/* ================================================
-          CODEMIRROR
-      ================================================ */}
 
       <CodeMirror
         value={localValue}

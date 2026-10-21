@@ -19,8 +19,14 @@ import {
 } from "antd";
 import Text from "antd/es/typography/Text";
 import { debounce } from "lodash";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getCMSPageBySlugApi } from "../api/cms.service";
 import useCMSForm from "../hooks/useCMSForm";
+import {
+  buildEntitySlugAndUrl,
+  buildFrontendUrl,
+  slugify,
+} from "../utils/cmsUrl";
 import ImageUpload from "./../../shared/imageUpload/ImageUpload"; // apne path ke hisab se
 import CMSBlocksBuilder from "./CMSBlocksBuilder";
 import CMSSeoFields from "./CMSSeoFields";
@@ -41,6 +47,8 @@ export default function CMSForm({ id }) {
   console.log("CMSForm masterData", masterData);
 
   const title = Form.useWatch("title", form);
+  const slug = Form.useWatch("slug", form);
+  const entityId = Form.useWatch("entityId", form);
   const hotelMeta = Form.useWatch(["data", "hotelMeta"], form);
   const cityMeta = Form.useWatch("cityMeta", form);
 
@@ -83,18 +91,38 @@ export default function CMSForm({ id }) {
       }
     }
 
-    if (entityType === "hotelCity") {
-      if (cityMeta?.destination) {
-        debouncedPreview();
-      }
+    if (entityType === "hotelCity" || entityType === "hotel") {
+      const generated = buildEntitySlugAndUrl({
+        entityType,
+        cityMeta,
+        hotelMeta,
+      });
+      if (generated) form.setFieldsValue(generated);
     }
+  }, [entityType, title, cityMeta, hotelMeta, id, debouncedPreview, form]);
 
-    if (entityType === "hotel") {
-      if (hotelMeta?.hotelName) {
-        debouncedPreview();
-      }
+  const [duplicateSlug, setDuplicateSlug] = useState(false);
+
+  useEffect(() => {
+    if (!slug) {
+      setDuplicateSlug(false);
+      return;
     }
-  }, [entityType, title, cityMeta, hotelMeta, id]);
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        const existing = await getCMSPageBySlugApi(slug);
+        const existingId = existing?._id || existing?.id;
+        if (active) setDuplicateSlug(Boolean(existing && existingId !== id));
+      } catch {
+        if (active) setDuplicateSlug(false);
+      }
+    }, 500);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [slug, id]);
 
   /*
     PREVIEW
@@ -112,25 +140,33 @@ export default function CMSForm({ id }) {
       return;
     }
 
-    const frontendUrl = (
-      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000"
-    ).replace(/\/+$/, "");
-
-    window.open(`${frontendUrl}${values.url}?preview=true`, "_blank");
+    window.open(
+      buildFrontendUrl(values.url, { preview: true }),
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
-  // const slug = Form.useWatch("slug", form);
-
   const url = Form.useWatch("url", form);
+
+  const handleSlugChange = (event) => {
+    const nextSlug = slugify(event.target.value);
+
+    let nextUrl = `/${nextSlug}`;
+    if (entityType === "hotelCity") {
+      nextUrl = `/hotels/${nextSlug}`;
+    } else if (entityType === "hotel") {
+      const citySlug = slugify((cityMeta?.destination || "").split(",")[0]);
+      nextUrl = `/hotel-details/${citySlug}/${nextSlug}`;
+    }
+
+    form.setFieldsValue({ slug: nextSlug, url: nextUrl });
+  };
 
   const handleCopySlug = async () => {
     if (!url) return;
 
-    const baseUrl = (
-      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000"
-    ).replace(/\/+$/, "");
-
-    await navigator.clipboard.writeText(`${baseUrl}${url}`);
+    await navigator.clipboard.writeText(buildFrontendUrl(url));
 
     message.success("URL copied successfully");
   };
@@ -196,10 +232,6 @@ export default function CMSForm({ id }) {
                     label: "Hotel Pages",
                   },
                   {
-                    value: "marketing",
-                    label: "Marketing",
-                  },
-                  {
                     value: "blog",
                     label: "Blogs",
                   },
@@ -249,8 +281,29 @@ export default function CMSForm({ id }) {
                 </Form.Item>
               </Col>
 
-              <Col xs={24} md={12}>
-                <Form.Item label={<span className="font-bold">Slug</span>}>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  name="slug"
+                  label={<span className="font-bold">Slug</span>}
+                  validateStatus={duplicateSlug ? "warning" : undefined}
+                  help={
+                    duplicateSlug
+                      ? "This slug already exists. Change it before saving."
+                      : undefined
+                  }
+                >
+                  <Input
+                    size="large"
+                    onChange={handleSlugChange}
+                    placeholder="Auto generated"
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label={<span className="font-bold">Public URL</span>}
+                >
                   <div
                     style={{
                       display: "flex",
@@ -283,12 +336,14 @@ export default function CMSForm({ id }) {
               </Col>
             </Row>
 
-            {entityType === "hotelCity" && <CMSCitySelector form={form} />}
+            {entityType === "hotelCity" && (
+              <CMSCitySelector form={form} entityType={entityType} />
+            )}
 
             {entityType === "hotel" && (
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <CMSCitySelector form={form} />
+                  <CMSCitySelector form={form} entityType={entityType} />
                 </Col>
 
                 <Col xs={24} md={12}>

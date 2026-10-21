@@ -6,15 +6,15 @@ export default function CMSSeoFields() {
   return (
     <>
       <Form.Item name="metaTitle" label="Meta Title">
-        <Input />
+        <Input showCount maxLength={100} />
       </Form.Item>
 
       <Form.Item name="metaDescription" label="Meta Description">
-        <Input.TextArea rows={3} />
+        <Input.TextArea rows={3} showCount maxLength={1000} />
       </Form.Item>
 
       <Form.Item name="keywords" label="Keywords">
-        <Input placeholder="comma separated" />
+        <Input placeholder="comma separated" showCount maxLength={100} />
       </Form.Item>
     </>
   );
