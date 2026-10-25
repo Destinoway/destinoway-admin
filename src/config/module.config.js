@@ -9,10 +9,10 @@ export const moduleConfig = {
     actions: ["read", "update"],
   },
 
-  // bookings: {
-  //   label: "Bookings",
-  //   actions: ["read", "write", "update", "delete"],
-  // },
+  Bookings: {
+    label: "Bookings",
+    actions: ["read"],
+  },
 
   roles: {
     label: "Roles",

@@ -28,7 +28,7 @@ export const menuItems = [
   {
     key: "/dashboard/bookings",
     icon: <BookOutlined />,
-    label: <Link href="/dashboard#">Bookings</Link>,
+    label: <Link href="/dashboard/bookings">Bookings</Link>,
     module: "Bookings",
   },
 
