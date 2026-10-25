@@ -2079,7 +2079,10 @@ export default function TiptapToolbar({
   const addLink = () => {
     const current = editor.getAttributes("link")?.href || "";
 
-    const url = window.prompt("Enter URL", current || "https://");
+    const url = window.prompt(
+      "Enter URL (use /path for an internal link)",
+      current || "/",
+    );
 
     if (url === null) {
       return;
@@ -2112,19 +2115,26 @@ export default function TiptapToolbar({
    */
 
   const addImage = () => {
-    const url = window.prompt("Image URL", "https://");
+    const currentImage = editor.isActive("image");
+    const currentAttributes = editor.getAttributes("image");
+    const url = window.prompt(
+      "Image URL",
+      currentAttributes.src || "https://",
+    );
 
     if (!url) {
       return;
     }
 
-    editor
-      .chain()
-      .focus()
-      .setImage({
-        src: url.trim(),
-      })
-      .run();
+    const alt = window.prompt("Image ALT text", currentAttributes.alt || "");
+    if (alt === null) return;
+
+    const chain = editor.chain().focus();
+    if (currentImage) {
+      chain.updateAttributes("image", { src: url.trim(), alt: alt.trim() }).run();
+    } else {
+      chain.setImage({ src: url.trim(), alt: alt.trim() }).run();
+    }
   };
 
   /*
@@ -2456,7 +2466,7 @@ export default function TiptapToolbar({
 
       {/* IMAGE */}
 
-      <Tooltip title="Image URL">
+      <Tooltip title="Add or edit image URL and ALT text">
         <Button icon={<PictureOutlined />} onClick={addImage} />
       </Tooltip>
 

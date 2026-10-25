@@ -9,6 +9,7 @@ import {
   previewSlugApi,
 } from "../api/cms.service";
 import { useCMS } from "./useCMS";
+import { slugify } from "../utils/cmsUrl";
 
 export default function useCMSForm({ id, form }) {
   const router = useRouter();
@@ -43,6 +44,10 @@ export default function useCMSForm({ id, form }) {
 
           entityId: page?.entityId,
           url: page?.url,
+          canonicalUrl: page?.canonicalUrl ?? "",
+          featuredImageAlt: page?.featuredImageAlt ?? "",
+          originalSlug: page?.slug,
+          originalUrl: page?.url,
         });
       } catch {
         message.error("Failed to load page");
@@ -118,34 +123,46 @@ export default function useCMSForm({ id, form }) {
       }
     }
 
-    if (formValues.slug?.trim()) {
+    const finalSlug = slugify(formValues.slug || "");
+    if (finalSlug !== (formValues.slug || "")) {
+      form.setFieldsValue({ slug: finalSlug });
+    }
+
+    if (finalSlug) {
       try {
-        const existing = await getCMSPageBySlugApi(formValues.slug.trim());
+        const existing = await getCMSPageBySlugApi(finalSlug);
         if (existing && (existing._id || existing.id) !== id) {
           message.warning(
-            `Slug "${formValues.slug.trim()}" already exists. Please change it.`,
+            `Slug "${finalSlug}" already exists. Please change it.`,
           );
           return;
         }
-      } catch {
-        // slug not found: safe to save
+      } catch (err) {
+        if (err?.response?.status !== 404) {
+          message.error("Could not verify whether this slug is available.");
+          return;
+        }
       }
     }
 
     try {
       const payload = {
         title: formValues.title,
-        ...(formValues.slug?.trim() && { slug: formValues.slug.trim() }),
+        ...(finalSlug && { slug: finalSlug }),
         entityType: formValues.entityType,
         description: formValues.description,
         featuredImage: formValues?.blogMeta?.featuredImage,
+        featuredImageAlt: (formValues.featuredImageAlt ?? "").trim(),
         entityId: formValues.entityId,
         metaTitle: formValues.metaTitle,
         metaDescription: formValues.metaDescription,
+        canonicalUrl: (formValues.canonicalUrl ?? "").trim(),
         isPublished: formValues.isPublished,
         categoryId: formValues.categoryId,
-        keywords:
-          formValues?.keywords?.split(",")?.map((item) => item.trim()) || [],
+        keywords: (formValues?.keywords || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
         data: {
           ...(formValues?.data || {}),
           cityMeta: formValues?.cityMeta || null,
@@ -174,7 +191,11 @@ export default function useCMSForm({ id, form }) {
         });
       }
     } catch (err) {
-      console.log(err);
+      const apiMessage = err?.response?.data?.message;
+      // The API client already toasts the error; also pin slug errors to the field.
+      if (/slug/i.test(apiMessage || "")) {
+        form.setFields([{ name: "slug", errors: [apiMessage] }]);
+      }
     }
   };
 

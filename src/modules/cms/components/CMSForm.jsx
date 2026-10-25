@@ -3,7 +3,9 @@
 import { useMasterData } from "@/modules/master-data/hooks/useMasterData";
 import { usePermission } from "@/modules/shared/hooks/usePermission";
 import { CopyOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
+  Alert,
   App,
   Button,
   Card,
@@ -19,7 +21,8 @@ import {
 } from "antd";
 import Text from "antd/es/typography/Text";
 import { debounce } from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 import { getCMSPageBySlugApi } from "../api/cms.service";
 import useCMSForm from "../hooks/useCMSForm";
 import {
@@ -29,6 +32,7 @@ import {
 } from "../utils/cmsUrl";
 import ImageUpload from "./../../shared/imageUpload/ImageUpload"; // apne path ke hisab se
 import CMSBlocksBuilder from "./CMSBlocksBuilder";
+import CMSRedirectHistory from "./CMSRedirectHistory";
 import CMSSeoFields from "./CMSSeoFields";
 import CMSCitySelector from "./entity-selector/CMSCitySelector";
 import CMSHotelSelector from "./entity-selector/CMSHotelSelector";
@@ -48,6 +52,9 @@ export default function CMSForm({ id }) {
 
   const title = Form.useWatch("title", form);
   const slug = Form.useWatch("slug", form);
+  const [debouncedSlug] = useDebounce(slugify(slug || ""), 500);
+  const originalSlug = Form.useWatch("originalSlug", form);
+  const originalUrl = Form.useWatch("originalUrl", form);
   const entityId = Form.useWatch("entityId", form);
   const hotelMeta = Form.useWatch(["data", "hotelMeta"], form);
   const cityMeta = Form.useWatch("cityMeta", form);
@@ -101,28 +108,22 @@ export default function CMSForm({ id }) {
     }
   }, [entityType, title, cityMeta, hotelMeta, id, debouncedPreview, form]);
 
-  const [duplicateSlug, setDuplicateSlug] = useState(false);
-
-  useEffect(() => {
-    if (!slug) {
-      setDuplicateSlug(false);
-      return;
-    }
-    let active = true;
-    const timer = setTimeout(async () => {
+  const slugQuery = useQuery({
+    queryKey: ["cmsSlugCheck", debouncedSlug],
+    queryFn: async () => {
       try {
-        const existing = await getCMSPageBySlugApi(slug);
-        const existingId = existing?._id || existing?.id;
-        if (active) setDuplicateSlug(Boolean(existing && existingId !== id));
-      } catch {
-        if (active) setDuplicateSlug(false);
+        return await getCMSPageBySlugApi(debouncedSlug);
+      } catch (error) {
+        if (error?.response?.status === 404) return null;
+        throw error;
       }
-    }, 500);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [slug, id]);
+    },
+    enabled: Boolean(debouncedSlug),
+    retry: false,
+  });
+  const existingSlugId = slugQuery.data?._id || slugQuery.data?.id;
+  const duplicateSlug = Boolean(slugQuery.data && existingSlugId !== id);
+  const slugCheckFailed = slugQuery.isError;
 
   /*
     PREVIEW
@@ -148,19 +149,35 @@ export default function CMSForm({ id }) {
   };
 
   const url = Form.useWatch("url", form);
+  const urlChanged = Boolean(originalUrl && url && originalUrl !== url);
 
-  const handleSlugChange = (event) => {
-    const nextSlug = slugify(event.target.value);
-
-    let nextUrl = `/${nextSlug}`;
-    if (entityType === "hotelCity") {
-      nextUrl = `/hotels/${nextSlug}`;
-    } else if (entityType === "hotel") {
+  const buildSlugUrl = (finalSlug) => {
+    if (entityType === "hotelCity") return `/hotels/${finalSlug}`;
+    if (entityType === "hotel") {
       const citySlug = slugify((cityMeta?.destination || "").split(",")[0]);
-      nextUrl = `/hotel-details/${citySlug}/${nextSlug}`;
+      return `/hotel-details/${citySlug}/${finalSlug}`;
     }
+    return `/${finalSlug}`;
+  };
 
-    form.setFieldsValue({ slug: nextSlug, url: nextUrl });
+  // Keeps trailing "-" while typing; full normalization happens on blur/submit.
+  const handleSlugChange = (event) => {
+    const typedSlug = event.target.value
+      .toLowerCase()
+      .replace(/[\s_]+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-/, "");
+
+    form.setFieldsValue({
+      slug: typedSlug,
+      url: buildSlugUrl(slugify(typedSlug)),
+    });
+  };
+
+  const handleSlugBlur = () => {
+    const finalSlug = slugify(form.getFieldValue("slug") || "");
+    form.setFieldsValue({ slug: finalSlug, url: buildSlugUrl(finalSlug) });
   };
 
   const handleCopySlug = async () => {
@@ -295,9 +312,26 @@ export default function CMSForm({ id }) {
                   <Input
                     size="large"
                     onChange={handleSlugChange}
+                    onBlur={handleSlugBlur}
                     placeholder="Auto generated"
                   />
                 </Form.Item>
+                {slugCheckFailed && (
+                  <Alert
+                    type="error"
+                    showIcon
+                    message="Slug availability could not be checked."
+                  />
+                )}
+                {urlChanged && (
+                  <Alert
+                    type="warning"
+                    showIcon
+                    message="Public URL will change when you save."
+                    description={`${originalUrl || `/${originalSlug}`} → ${url || `/${slug}`}. The CMS backend records the old path as a 301 redirect; check redirect history below after saving.`}
+                    style={{ marginTop: 8 }}
+                  />
+                )}
               </Col>
 
               <Col xs={24} md={6}>
@@ -335,6 +369,8 @@ export default function CMSForm({ id }) {
                 </Form.Item>
               </Col>
             </Row>
+
+            {id && <CMSRedirectHistory id={id} />}
 
             {entityType === "hotelCity" && (
               <CMSCitySelector form={form} entityType={entityType} />
@@ -384,6 +420,22 @@ export default function CMSForm({ id }) {
                 >
                   <ImageUpload />
                 </Form.Item>
+                <Form.Item
+                  name="featuredImageAlt"
+                  label={<span className="font-bold">Featured Image ALT</span>}
+                  rules={[
+                    {
+                      max: 500,
+                      message: "ALT text must be at most 500 characters",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Describe the featured image"
+                    showCount
+                    maxLength={500}
+                  />
+                </Form.Item>
               </>
             )}
 
@@ -427,7 +479,7 @@ export default function CMSForm({ id }) {
                 boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
               }}
             >
-              <CMSSeoFields />
+              <CMSSeoFields form={form} id={id} />
 
               <Form.Item
                 name="isPublished"
