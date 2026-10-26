@@ -24,7 +24,7 @@ export default function PopularDestinationsForm({
 
   const [form] = Form.useForm();
 
-  const { destinations } = useMasterData(
+  const { masterData: destinations, isLoading: isLoadingCategories } = useMasterData(
     {
       type: "POPULAR_DESTINATIONS",
     },
@@ -100,6 +100,7 @@ export default function PopularDestinationsForm({
         <Select
           size="large"
           placeholder="Select Category"
+          loading={isLoadingCategories}
           options={(destinations || []).map((item) => ({
             label: item.placeName,
             value: item.placeName,

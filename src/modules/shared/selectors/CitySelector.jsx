@@ -37,22 +37,29 @@ export default function CitySelector({
     }
   }, [value, initialLabel]);
 
-  const fetchCities = async (keyword = "jaipur") => {
+  const fetchCities = async (keyword = "") => {
+    const searchText = keyword?.trim();
+
+    if (!searchText) {
+      setOptions([]);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const data = await getCitiesHotelsApi(keyword);
-
-      const cities = data.filter((item) => item.type !== "Hotel");
-
-      console.log("cities in cityselector", cities);
+      const data = await getCitiesHotelsApi(searchText);
 
       setOptions(
-        cities.map((item) => ({
-          label: item.name,
-          value: item.id,
-          raw: item,
-        })),
+        data.map((item) => {
+          const label = item.displayName || item.name || item.city || item.id;
+
+          return {
+            label,
+            value: item.id,
+            raw: { ...item, displayName: label },
+          };
+        }),
       );
     } finally {
       setLoading(false);
@@ -67,17 +74,19 @@ export default function CitySelector({
       loading={loading}
       placeholder={placeholder}
       options={options}
-      onFocus={() => fetchCities()}
       onSearch={fetchCities}
       onChange={(selectedValue, option) => {
+        const cityName =
+          option.raw.displayName || option.raw.name || option.raw.city || "";
+
         onChange?.({
           value: selectedValue,
 
           cityId: option.raw.id,
 
-          city: option.raw.name,
+          city: option.raw.city || cityName,
 
-          name: option.raw.name,
+          name: cityName,
         });
       }}
     />

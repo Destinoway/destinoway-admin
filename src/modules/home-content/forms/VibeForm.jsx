@@ -24,7 +24,7 @@ export default function VibeForm({
 
   const [form] = Form.useForm();
 
-  const { destinations } = useMasterData(
+  const { masterData: destinations, isLoading: isLoadingCategories } = useMasterData(
     {
       type: "YOUR_VIBE",
     },
@@ -97,6 +97,7 @@ export default function VibeForm({
         <Select
           size="large"
           placeholder="Select Category"
+          loading={isLoadingCategories}
           options={(destinations || []).map((item) => ({
             label: item.placeName,
             value: item.placeName,
