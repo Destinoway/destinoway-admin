@@ -176,7 +176,7 @@ export default function BookingDetailsPage({ bookingRef }) {
         <Alert
           type="error"
           showIcon
-          message="Could not load booking details"
+          title="Could not load booking details"
           description={
             error?.response?.data?.message || error?.message || "Please retry."
           }
@@ -235,7 +235,7 @@ export default function BookingDetailsPage({ bookingRef }) {
       guestsLabel: `${guests.length} guest${guests.length === 1 ? "" : "s"}`,
       count: roomGroup?.roomCount ?? priceRoomGroups[index]?.roomCount ?? 1,
       adults: occupancy?.numOfAdults ?? room.adults?.length ?? 0,
-      children: occupancy?.numOfChildren ?? room.children?.length ?? 0,
+      childCount: occupancy?.numOfChildren ?? room.children?.length ?? 0,
       refundability: roomGroup?.refundability,
       boardBasis: roomGroup?.boardBasis?.description,
       amenities: roomGroup?.room?.facilities || [],
@@ -259,8 +259,8 @@ export default function BookingDetailsPage({ bookingRef }) {
       title: "Occupancy",
       render: (_, room) =>
         `${room.adults} adult${room.adults === 1 ? "" : "s"}${
-          room.children
-            ? `, ${room.children} child${room.children === 1 ? "" : "ren"}`
+          room.childCount
+            ? `, ${room.childCount} child${room.childCount === 1 ? "" : "ren"}`
             : ""
         }`,
     },
@@ -956,7 +956,7 @@ export default function BookingDetailsPage({ bookingRef }) {
         <Alert
           type="error"
           showIcon
-          message="Booking process errors"
+          title="Booking process errors"
           description={
             <ul className="m-0 list-disc pl-5">
               {failureItems.map(([label, value]) => (

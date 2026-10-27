@@ -25,7 +25,7 @@ export default function CMSRedirectHistory({ id }) {
         <Alert
           type="info"
           showIcon
-          message="Redirect history could not be loaded."
+          title="Redirect history could not be loaded."
         />
       ) : (
         <>

@@ -247,7 +247,7 @@ export default function BookingsPage() {
                 className="mb-4"
                 type="error"
                 showIcon
-                message="Could not load bookings"
+                title="Could not load bookings"
                 description={
                   error?.response?.data?.message ||
                   error?.message ||

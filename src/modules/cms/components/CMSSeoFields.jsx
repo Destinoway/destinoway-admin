@@ -124,7 +124,7 @@ export default function CMSSeoFields({ form, id }) {
         <Alert
           type="warning"
           showIcon
-          message={duplicateMessage("meta title", titleDuplicate)}
+          title={duplicateMessage("meta title", titleDuplicate)}
           style={{ marginTop: -20, marginBottom: 16 }}
         />
       )}
@@ -136,7 +136,7 @@ export default function CMSSeoFields({ form, id }) {
         <Alert
           type="warning"
           showIcon
-          message={duplicateMessage("meta description", descriptionDuplicate)}
+          title={duplicateMessage("meta description", descriptionDuplicate)}
           style={{ marginTop: -20, marginBottom: 16 }}
         />
       )}
@@ -158,7 +158,7 @@ export default function CMSSeoFields({ form, id }) {
         <Alert
           type="info"
           showIcon
-          message="Duplicate metadata check is unavailable right now."
+          title="Duplicate metadata check is unavailable right now."
         />
       )}
     </>

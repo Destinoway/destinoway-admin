@@ -320,14 +320,14 @@ export default function CMSForm({ id }) {
                   <Alert
                     type="error"
                     showIcon
-                    message="Slug availability could not be checked."
+                    title="Slug availability could not be checked."
                   />
                 )}
                 {urlChanged && (
                   <Alert
                     type="warning"
                     showIcon
-                    message="Public URL will change when you save."
+                    title="Public URL will change when you save."
                     description={`${originalUrl || `/${originalSlug}`} → ${url || `/${slug}`}. The CMS backend records the old path as a 301 redirect; check redirect history below after saving.`}
                     style={{ marginTop: 8 }}
                   />
