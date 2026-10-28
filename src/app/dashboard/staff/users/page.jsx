@@ -4,11 +4,11 @@ import { useRoles } from "@/modules/role/hooks/useRoles";
 import TableFilters from "@/modules/shared/components/TableFilters";
 import { usePermission } from "@/modules/shared/hooks/usePermission"; // ✅ NEW
 import { updateStaffStatus } from "@/modules/staff/api/user.service";
-import StaffFormModal from "@/modules/staff/components/StaffFormModal";
+import StaffFormDrawer from "@/modules/staff/components/StaffFormDrawer";
 import { useStaff } from "@/modules/staff/hooks/useStaff";
-import { EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined, UserOutlined } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Empty, Space, Switch, Table, Tag, Tooltip } from "antd";
+import { Avatar, Button, Card, Empty, Space, Switch, Table, Tag, Tooltip, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import PermissionPopover from "../../../../modules/shared/components/PermissionPopover";
@@ -33,7 +33,6 @@ export default function StaffPage() {
     value: role.value,
   }));
 
-  console.log("rolesData in userpage", roles);
   const { canRead, canCreate, canEdit, isAdmin } = usePermission("users");
 
   const canFetch = canRead || isAdmin;
@@ -83,33 +82,65 @@ export default function StaffPage() {
       title: "Name",
       dataIndex: "name",
       sorter: true,
+      width: 220,
+      render: (name, record) => (
+        <Space size={10}>
+          <Avatar
+            size={36}
+            icon={<UserOutlined />}
+            className="!bg-sky-100 !font-semibold !text-sky-700"
+          >
+            {name?.slice(0, 1)?.toUpperCase()}
+          </Avatar>
+          <span className="min-w-0">
+            <Typography.Text strong className="block max-w-[150px]" ellipsis={{ tooltip: name || "Staff member" }}>
+              {name || "Staff member"}
+            </Typography.Text>
+            {record.isSystemRole && <Tag color="gold" className="!m-0 !rounded-full !text-[10px]">System</Tag>}
+          </span>
+        </Space>
+      ),
     },
     {
       title: "Email",
       dataIndex: "email",
       sorter: true,
+      width: 240,
+      render: (email) => (
+        <Typography.Text type="secondary" ellipsis={{ tooltip: email }} className="max-w-[210px]">
+          {email || "-"}
+        </Typography.Text>
+      ),
     },
-    { title: "Mobile", dataIndex: "mobile" },
+    {
+      title: "Mobile",
+      dataIndex: "mobile",
+      width: 150,
+      render: (mobile) => mobile || <Typography.Text type="secondary">-</Typography.Text>,
+    },
 
     {
       title: "Role",
-      render: (_, r) =>
-        r.role?.name ? (
-          <Tag color="blue">{r.role.name}</Tag>
-        ) : (
-          <Tag>No Role</Tag>
-        ),
+      width: 150,
+      render: (_, r) => r.role?.name ? (
+        <Tag color="geekblue" className="!m-0 !rounded-full !px-2.5">{r.role.name}</Tag>
+      ) : <Tag className="!m-0 !rounded-full">No role</Tag>,
     },
 
     {
       title: "Status",
       dataIndex: "isActive",
-      render: (val) =>
-        val ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+      width: 120,
+      render: (val) => val ? (
+        <Tag color="green" className="!m-0 !rounded-full !px-2.5">Active</Tag>
+      ) : (
+        <Tag color="red" className="!m-0 !rounded-full !px-2.5">Inactive</Tag>
+      ),
     },
 
     {
       title: "Permissions",
+      width: 150,
       render: (_, r) => {
         const perms = r.permissions || r.role?.permissions;
         return <PermissionPopover permissions={perms} />;
@@ -118,12 +149,14 @@ export default function StaffPage() {
 
     {
       title: "Actions",
+      width: 120,
       render: (_, record) => (
         <Space>
           {/* EDIT */}
           {canEdit && (
             <Tooltip title="Edit Staff">
               <Button
+                className="!rounded-lg"
                 icon={<EditOutlined />}
                 onClick={() => handleEdit(record)}
               />
@@ -148,7 +181,13 @@ export default function StaffPage() {
 
   return (
     <Card
-      title="Staff Management"
+      className="management-page-card !rounded-2xl !border-0 !shadow-sm"
+      title={
+        <div className="flex flex-col gap-0.5">
+          <Typography.Text strong className="!text-lg">Staff Management</Typography.Text>
+          <Typography.Text type="secondary" className="!text-xs">Manage staff profiles, roles and access status</Typography.Text>
+        </div>
+      }
       extra={
         canCreate && (
           <Button
@@ -185,10 +224,13 @@ export default function StaffPage() {
           />
 
           <Table
+            className="management-table staff-management-table"
             loading={isLoading}
             columns={columns}
             dataSource={staff}
             rowKey="_id"
+            size="middle"
+            bordered={false}
             scroll={{ x: 900 }}
             pagination={{
               current: page,
@@ -213,7 +255,7 @@ export default function StaffPage() {
         <Empty description="No permission to view data" />
       )}
 
-      <StaffFormModal open={open} setOpen={setOpen} editData={editData} />
+      <StaffFormDrawer open={open} setOpen={setOpen} editData={editData} />
     </Card>
   );
 }

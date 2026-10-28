@@ -708,6 +708,81 @@ body.dark .ant-menu-item-selected {
   outline: 2px solid var(--editor-primary);
 }
 
+.tiptap-editor-content .ProseMirror [data-resize-wrapper] {
+  max-width: 100%;
+  line-height: 0;
+}
+
+/* Keep the resize image itself in flow; alignment is applied to its node view. */
+.tiptap-editor-content .ProseMirror [data-resize-wrapper] > img {
+  float: none !important;
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-container][data-node="image"] {
+  width: max-content;
+  max-width: 100%;
+  margin: 10px auto !important;
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-container][data-image-layout="left"] {
+  float: left;
+  margin: 0 16px 12px 0;
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-container][data-image-layout="right"] {
+  float: right;
+  margin: 0 0 12px 16px;
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-handle] {
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--editor-primary);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-handle="top-left"],
+.tiptap-editor-content .ProseMirror [data-resize-handle="bottom-right"] {
+  cursor: nwse-resize;
+}
+
+.tiptap-editor-content .ProseMirror [data-resize-handle="top-right"],
+.tiptap-editor-content .ProseMirror [data-resize-handle="bottom-left"] {
+  cursor: nesw-resize;
+}
+
+.tiptap-image-controls {
+  padding: 6px;
+  border: 1px solid var(--editor-border, #d9d9d9);
+  border-radius: 8px;
+  background: var(--editor-bg, #fff);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 18%);
+}
+
+.tiptap-rotate-handle {
+  position: relative;
+  cursor: grab !important;
+  touch-action: none;
+}
+
+.tiptap-rotate-handle:active {
+  cursor: grabbing !important;
+}
+
+.tiptap-rotate-handle::after {
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: var(--editor-muted, #888);
+  content: "";
+  transform: translateX(-50%);
+}
+
 /* =========================================================
    HORIZONTAL RULE
    ========================================================= */
@@ -1052,6 +1127,314 @@ body.dark .ant-menu-item-selected {
 }
 
 /* =========================================================
+   ROLE FORM & STAFF DRAWER
+   ========================================================= */
+
+.role-form-page .role-details-card,
+.role-form-page .role-permission-card {
+  border-color: #e4edf0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 4%);
+}
+
+.role-form-page .role-details-card .ant-card-head {
+  min-height: 54px;
+  border-bottom-color: #edf2f4;
+}
+
+.role-form-page .role-permission-card {
+  height: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.role-form-page .role-permission-card:hover {
+  border-color: #99d6cd;
+  box-shadow: 0 8px 22px rgb(15 118 110 / 8%);
+}
+
+.role-form-page .role-permission-item .ant-checkbox-wrapper {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 9px;
+  border: 1px solid #e8eef0;
+  border-radius: 9px;
+  background: #f8fafb;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.role-form-page .role-permission-item .ant-checkbox-wrapper:hover {
+  border-color: #8bcfc5;
+  background: #f0fdfa;
+}
+
+.role-form-actions {
+  padding-top: 18px;
+  border-top: 1px solid #e8eef0;
+}
+
+.staff-form-drawer .ant-drawer-header {
+  padding: 22px 24px;
+}
+
+.staff-form-drawer .ant-drawer-footer {
+  border-top-color: #e8eef0;
+}
+
+body.dark .role-form-page .role-details-card,
+body.dark .role-form-page .role-permission-card {
+  border-color: #263940;
+  background: #102027;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 14%);
+}
+
+body.dark .role-form-page .role-details-card .ant-card-head,
+body.dark .role-form-actions,
+body.dark .staff-form-drawer .ant-drawer-footer {
+  border-color: #263940;
+}
+
+body.dark .role-form-page .role-permission-item .ant-checkbox-wrapper {
+  border-color: #2b4249;
+  background: #142a31;
+}
+
+body.dark .role-form-page .role-permission-item .ant-checkbox-wrapper:hover {
+  border-color: #3a8279;
+  background: #17343a;
+}
+
+body.dark .staff-form-drawer .ant-drawer-header {
+  border-bottom-color: #263940;
+}
+
+body.dark .staff-form-drawer .ant-drawer-body {
+  background: #102027;
+}
+
+/* =========================================================
+   STAFF & ROLE MANAGEMENT TABLES
+   ========================================================= */
+
+.management-page-card .ant-card-head {
+  min-height: 76px;
+  border-bottom-color: #edf2f4;
+  padding-inline: 22px;
+}
+
+.management-page-card .ant-card-body {
+  padding: 18px 22px 20px;
+}
+
+.management-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.management-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.management-table .ant-table-tbody > tr:hover > td {
+  background: #f0fdfa !important;
+}
+
+.management-table .ant-btn {
+  box-shadow: none;
+}
+
+body.dark .management-page-card .ant-card-head {
+  border-bottom-color: #263940;
+}
+
+body.dark .management-table .ant-table-thead > tr > th {
+  border-color: #263940;
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .management-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .management-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+body.dark .management-table .ant-table-cell-fix-left,
+body.dark .management-table .ant-table-cell-fix-right {
+  background: #102027;
+}
+
+/* =========================================================
+   BOOKING DETAILS PAGE
+   ========================================================= */
+
+.booking-detail-page > .ant-card {
+  border: 1px solid #e8eef0;
+  border-radius: 18px;
+  box-shadow: 0 6px 22px rgb(15 23 42 / 4%);
+}
+
+.booking-detail-page > .ant-card .ant-card-head {
+  min-height: 62px;
+  border-bottom-color: #edf2f4;
+}
+
+.booking-detail-summary-card {
+  border: 1px solid #e8eef0 !important;
+  background: #fff;
+}
+
+.booking-detail-descriptions .ant-descriptions-item-label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.booking-detail-descriptions .ant-descriptions-item-content {
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.booking-detail-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.booking-detail-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+}
+
+.booking-technical-collapse {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+body.dark .booking-detail-page > .ant-card {
+  border-color: #263940;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+}
+
+body.dark .booking-detail-page > .ant-card .ant-card-head {
+  border-bottom-color: #263940;
+}
+
+body.dark .booking-detail-summary-card {
+  border-color: #263940 !important;
+  background: #102027;
+}
+
+body.dark .booking-detail-descriptions .ant-descriptions-item-label {
+  color: #94a3b8;
+}
+
+body.dark .booking-detail-descriptions .ant-descriptions-item-content {
+  color: #e2e8f0;
+}
+
+body.dark .booking-detail-table .ant-table-thead > tr > th {
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .booking-detail-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .booking-detail-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+/* =========================================================
+   HOTEL BOOKINGS TABLE
+   ========================================================= */
+
+.booking-tabs-wrap {
+  overflow-x: auto;
+}
+
+.booking-status-tabs {
+  min-width: max-content;
+}
+
+.booking-status-tabs .ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+.booking-status-tabs .ant-tabs-tab {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.booking-status-tabs .ant-tabs-tab-active .booking-tab-label {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.booking-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.booking-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.booking-table .ant-table-tbody > tr:hover > td {
+  background: #f0fdfa !important;
+}
+
+body.dark .booking-status-tabs .ant-tabs-tab-active .booking-tab-label {
+  color: #5eead4;
+}
+
+body.dark .booking-tabs-wrap {
+  border-color: #263940 !important;
+}
+
+body.dark .booking-table .ant-table-thead > tr > th {
+  border-color: #263940;
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .booking-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .booking-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+body.dark .booking-table .ant-table-cell-fix-left,
+body.dark .booking-table .ant-table-cell-fix-right {
+  background: #102027;
+}
+
+/* =========================================================
    MODAL
    ========================================================= */
 
@@ -1066,329 +1449,6 @@ body.dark .ant-menu-item-selected {
 
 [data-theme="dark"] .tiptap-editor-content .ProseMirror {
   color: var(--editor-text);
-}
-
-/* =========================================================
-   =========================================================
-   CKEDITOR
-   =========================================================
-   ========================================================= */
-
-/* =========================================================
-   WRAPPER
-   ========================================================= */
-
-.cms-ckeditor-wrapper {
-  width: 100%;
-  position: relative;
-}
-
-.cms-ckeditor-wrapper .ck-editor {
-  width: 100%;
-}
-
-/* =========================================================
-   CKEDITOR EDITABLE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-editor__editable {
-  min-height: 350px;
-  max-height: 650px;
-
-  padding: 20px 24px !important;
-
-  font-size: 16px;
-  line-height: 1.8;
-
-  overflow-y: auto;
-}
-
-/* =========================================================
-   CKEDITOR CONTENT
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content {
-  min-height: 350px;
-}
-
-/* Paragraph */
-
-.cms-ckeditor-wrapper .ck-content p {
-  margin-top: 0;
-  margin-bottom: 1em;
-}
-
-/* =========================================================
-   HEADINGS
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content h1,
-.cms-ckeditor-wrapper .ck-content h2,
-.cms-ckeditor-wrapper .ck-content h3,
-.cms-ckeditor-wrapper .ck-content h4,
-.cms-ckeditor-wrapper .ck-content h5,
-.cms-ckeditor-wrapper .ck-content h6 {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-}
-
-.cms-ckeditor-wrapper .ck-content h1 {
-  font-size: 2em;
-}
-
-.cms-ckeditor-wrapper .ck-content h2 {
-  font-size: 1.5em;
-}
-
-.cms-ckeditor-wrapper .ck-content h3 {
-  font-size: 1.25em;
-}
-
-/* =========================================================
-   LISTS
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content ul,
-.cms-ckeditor-wrapper .ck-content ol {
-  padding-left: 28px;
-}
-
-.cms-ckeditor-wrapper .ck-content li {
-  margin-bottom: 4px;
-}
-
-/* =========================================================
-   LINKS
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content a {
-  color: #1677ff;
-  text-decoration: underline;
-}
-
-/* =========================================================
-   BLOCKQUOTE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content blockquote {
-  border-left: 4px solid #1677ff;
-
-  margin: 16px 0;
-
-  padding-left: 16px;
-}
-
-/* =========================================================
-   TABLE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content table {
-  width: 100%;
-
-  border-collapse: collapse;
-}
-
-.cms-ckeditor-wrapper .ck-content table td,
-.cms-ckeditor-wrapper .ck-content table th {
-  min-width: 60px;
-
-  padding: 8px 10px;
-
-  border: 1px solid #d9d9d9;
-}
-
-/* =========================================================
-   IMAGE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* =========================================================
-   CODE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content code {
-  padding: 2px 5px;
-
-  border-radius: 4px;
-
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-.cms-ckeditor-wrapper .ck-content pre {
-  overflow-x: auto;
-
-  padding: 16px;
-
-  border-radius: 6px;
-}
-
-/* =========================================================
-   CKEDITOR TOOLBAR
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-toolbar {
-  border-radius: 6px 6px 0 0;
-}
-
-/* =========================================================
-   CKEDITOR SOURCE EDITOR
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-source-editing-area {
-  min-height: 500px;
-}
-
-.cms-ckeditor-wrapper .ck-source-editing-area textarea {
-  width: 100%;
-
-  min-height: 500px;
-
-  resize: vertical;
-
-  padding: 20px;
-
-  box-sizing: border-box;
-
-  font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
-
-  font-size: 14px;
-
-  line-height: 1.6;
-}
-
-/* =========================================================
-   CKEDITOR SOURCE MODE
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-source-editing-area {
-  background: var(--editor-bg);
-}
-
-/* =========================================================
-   CKEDITOR DARK THEME
-   ========================================================= */
-
-[data-theme="dark"] .cms-ckeditor-wrapper .ck-editor {
-  --ck-color-base-background: #141414;
-  --ck-color-base-foreground: #1f1f1f;
-  --ck-color-base-border: #434343;
-
-  --ck-color-toolbar-background: #1f1f1f;
-  --ck-color-toolbar-border: #434343;
-
-  --ck-color-text: #ffffff;
-
-  --ck-color-button-default-background: transparent;
-  --ck-color-button-default-hover-background: #303030;
-  --ck-color-button-default-active-background: #303030;
-
-  --ck-color-button-on-background: #1677ff;
-
-  --ck-color-input-background: #141414;
-  --ck-color-input-border: #434343;
-
-  --ck-color-dropdown-panel-background: #1f1f1f;
-  --ck-color-dropdown-panel-border: #434343;
-
-  --ck-color-list-background: #1f1f1f;
-
-  --ck-color-button-action-background: #1677ff;
-  --ck-color-button-action-text: #ffffff;
-}
-
-/* Dark editor content */
-
-[data-theme="dark"] .cms-ckeditor-wrapper .ck-editor__editable {
-  background: #141414;
-
-  color: #ffffff;
-}
-
-/* Dark links */
-
-[data-theme="dark"] .cms-ckeditor-wrapper .ck-content a {
-  color: #69b1ff;
-}
-
-/* Dark source */
-
-[data-theme="dark"] .cms-ckeditor-wrapper .ck-source-editing-area {
-  background: #141414;
-
-  color: #ffffff;
-}
-
-[data-theme="dark"] .cms-ckeditor-wrapper .ck-source-editing-area textarea {
-  background: #141414;
-
-  color: #ffffff;
-
-  border-color: #434343;
-}
-
-/* =========================================================
-   CKEDITOR LIGHT THEME
-   ========================================================= */
-
-[data-theme="light"] .cms-ckeditor-wrapper .ck-editor {
-  --ck-color-base-background: #ffffff;
-  --ck-color-base-foreground: #ffffff;
-  --ck-color-base-border: #d9d9d9;
-
-  --ck-color-toolbar-background: #ffffff;
-  --ck-color-toolbar-border: #d9d9d9;
-
-  --ck-color-text: #1f1f1f;
-
-  --ck-color-button-default-background: transparent;
-  --ck-color-button-default-hover-background: #f5f5f5;
-  --ck-color-button-default-active-background: #e6f4ff;
-
-  --ck-color-button-on-background: #1677ff;
-
-  --ck-color-input-background: #ffffff;
-  --ck-color-input-border: #d9d9d9;
-
-  --ck-color-dropdown-panel-background: #ffffff;
-  --ck-color-dropdown-panel-border: #d9d9d9;
-
-  --ck-color-list-background: #ffffff;
-}
-
-/* Light editor content */
-
-[data-theme="light"] .cms-ckeditor-wrapper .ck-editor__editable {
-  background: #ffffff;
-
-  color: #1f1f1f;
-}
-
-/* Light source */
-
-[data-theme="light"] .cms-ckeditor-wrapper .ck-source-editing-area {
-  background: #ffffff;
-
-  color: #1f1f1f;
-}
-
-[data-theme="light"] .cms-ckeditor-wrapper .ck-source-editing-area textarea {
-  background: #ffffff;
-
-  color: #1f1f1f;
-
-  border-color: #d9d9d9;
-}
-
-/* =========================================================
-   CKEDITOR FULL WIDTH CONTENT
-   ========================================================= */
-
-.cms-ckeditor-wrapper .ck-content iframe {
-  max-width: 100%;
 }
 
 /* =========================================================
@@ -1412,18 +1472,5 @@ body.dark .ant-menu-item-selected {
 
   .tiptap-editor-content-fullscreen .ProseMirror {
     font-size: 16px;
-  }
-
-  .cms-ckeditor-wrapper .ck-editor__editable {
-    min-height: 300px;
-    max-height: 550px;
-
-    padding: 16px !important;
-
-    font-size: 15px;
-  }
-
-  .cms-ckeditor-wrapper .ck-content {
-    min-height: 300px;
   }
 }

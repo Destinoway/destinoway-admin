@@ -143,6 +143,7 @@ export default function CMSImageUpload({ form, namePath, label = "Image" }) {
 
             {image && (
               <Image
+                alt="Uploaded image preview"
                 styles={{
                   root: {
                     display: "none",

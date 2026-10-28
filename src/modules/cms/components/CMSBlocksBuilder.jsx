@@ -3,7 +3,6 @@
 import { Button, Card, Collapse, Form, Input, Select, theme } from "antd";
 import CMSImageUpload from "./CMSImageUpload";
 import TextEditor from "./editor/TextEditor";
-// import CKEditorTextEditor from "./editor/CKEditorTextEditor";
 
 const blockOptions = [
   {
@@ -73,6 +72,12 @@ function BlockFields({ field, form }) {
                   label="Hero Image"
                   namePath={["data", "blocks", field.name, "data", "image"]}
                 />
+                <Form.Item
+                  name={[field.name, "data", "imageAlt"]}
+                  label="Hero image ALT text"
+                >
+                  <Input placeholder="Describe the image for screen readers" />
+                </Form.Item>
 
                 {/* Button Fields - 6 / 6 */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -106,7 +111,6 @@ function BlockFields({ field, form }) {
             {type === "content" && (
               <Form.Item name={[field.name, "data", "content"]} label="Content">
                 <TextEditor />
-                {/* <CKEditorTextEditor /> */}
               </Form.Item>
             )}
 
@@ -120,9 +124,9 @@ function BlockFields({ field, form }) {
                 </Form.Item>
 
                 <Form.List name={[field.name, "data", "items"]}>
-                  {(faqFields, { add, remove }) => (
+                  {(faqFields, { add, remove, move }) => (
                     <>
-                      {faqFields.map((faqField) => (
+                      {faqFields.map((faqField, index) => (
                         <Card
                           key={faqField.key}
                           size="small"
@@ -130,13 +134,33 @@ function BlockFields({ field, form }) {
                             marginBottom: 12,
                           }}
                           extra={
-                            <Button
-                              danger
-                              size="small"
-                              onClick={() => remove(faqField.name)}
-                            >
-                              Remove
-                            </Button>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <Button
+                                size="small"
+                                disabled={index === 0}
+                                onClick={() =>
+                                  move(faqField.name, faqField.name - 1)
+                                }
+                              >
+                                ↑
+                              </Button>
+                              <Button
+                                size="small"
+                                disabled={index === faqFields.length - 1}
+                                onClick={() =>
+                                  move(faqField.name, faqField.name + 1)
+                                }
+                              >
+                                ↓
+                              </Button>
+                              <Button
+                                danger
+                                size="small"
+                                onClick={() => remove(faqField.name)}
+                              >
+                                Remove
+                              </Button>
+                            </div>
                           }
                         >
                           <Form.Item
@@ -185,6 +209,12 @@ function BlockFields({ field, form }) {
                   label="Marketing Image"
                   namePath={["data", "blocks", field.name, "data", "image"]}
                 />
+                <Form.Item
+                  name={[field.name, "data", "imageAlt"]}
+                  label="Marketing image ALT text"
+                >
+                  <Input placeholder="Describe the image for screen readers" />
+                </Form.Item>
 
                 <Form.List name={[field.name, "data", "items"]}>
                   {(itemFields, { add, remove }) => (
@@ -297,8 +327,6 @@ function BlockFields({ field, form }) {
                   }
                 >
                   <TextEditor />
-                  {/* <CKEditorTextEditor /> */}
-
                 </Form.Item>
 
                 {/* Section Image */}
@@ -307,6 +335,12 @@ function BlockFields({ field, form }) {
                   label="Section Image"
                   namePath={["data", "blocks", field.name, "data", "image"]}
                 />
+                <Form.Item
+                  name={[field.name, "data", "imageAlt"]}
+                  label="Section image ALT text"
+                >
+                  <Input placeholder="Describe the image for screen readers" />
+                </Form.Item>
 
                 {/* Image Position */}
                 <Form.Item
@@ -448,7 +482,7 @@ function BlockFields({ field, form }) {
                                           Label
                                         </span>
                                       }
-                                      className="!mb-0"
+                                        className="mb-0!"
                                     >
                                       <Input
                                         size="large"
@@ -464,11 +498,11 @@ function BlockFields({ field, form }) {
                                           URL
                                         </span>
                                       }
-                                      className="!mb-0"
+                                        className="mb-0!"
                                     >
                                       <Input
                                         size="large"
-                                        placeholder="https://example.com"
+                                        placeholder="/page-path or https://example.com"
                                       />
                                     </Form.Item>
                                   </div>

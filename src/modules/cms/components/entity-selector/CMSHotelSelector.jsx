@@ -1,96 +1,113 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Form, Select, Spin } from "antd";
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { useState } from "react";
+import { useDebounce } from "use-debounce";
 
-import { searchCMSHotelsApi } from "@/modules/markeups/services/markup.service";
+import {
+  getCMSHotelSearchResultsApi,
+  startCMSHotelSearchApi,
+} from "@/modules/markeups/services/markup.service";
 
 export default function CMSHotelSelector({ form }) {
-  const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 300);
   const cityMeta = Form.useWatch("cityMeta", form);
-  const selectedHotelId = Form.useWatch("selectedHotel", form);
-
-  const loadHotels = async (searchText = "") => {
-    const city = cityMeta?.city || cityMeta?.destination || "";
-    const state = cityMeta?.state || cityMeta?.stateName || "";
-    const country = cityMeta?.country || "";
-
-    if (!cityMeta?.destinationId || !city) {
-      setOptions([]);
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await searchCMSHotelsApi({
-        search: searchText,
-        city,
-        state,
-        country,
-        page: 1,
-        limit: 20,
-      });
-
-      const hotels = Array.isArray(response?.data?.hotels)
-        ? response.data.hotels
-        : Array.isArray(response?.data)
-          ? response.data
-          : [];
-
-      const mappedHotels = hotels
-        .map((hotel) => {
-          const hotelId = hotel?.id || hotel?.hotelId || hotel?.HotelId || "";
-          const hotelName =
-            hotel?.hotelName || hotel?.name || hotel?.HotelName || "";
-          if (!hotelId || !hotelName) {
-            return null;
-          }
-
-          return {
-            label: hotelName,
-            value: hotelId,
-            hotel,
-          };
-        })
-        .filter(Boolean);
-
-      setOptions(mappedHotels);
-
-      if (selectedHotelId) {
-        const existingHotel = mappedHotels.find(
-          (item) => String(item.value) === String(selectedHotelId),
-        );
-
-        if (existingHotel) {
-          const hotel = existingHotel.hotel;
-
-          form.setFieldValue(["data", "hotelMeta"], {
-            hotelId: hotel?.id || hotel?.hotelId || existingHotel.value,
-            hotelName: hotel?.hotelName || hotel?.name || existingHotel.label,
-          });
-        }
-      }
-    } catch (error) {
-      console.error("CMS HOTEL SEARCH ERROR:", error);
-
-      setOptions([]);
-    } finally {
-      setLoading(false);
-    }
+  const geoCode = cityMeta?.geoCode || cityMeta?.coordinates || {
+    lat: cityMeta?.latitude,
+    long: cityMeta?.longitude,
   };
+  const hasCoordinates =
+    geoCode?.lat !== null &&
+    geoCode?.lat !== undefined &&
+    geoCode?.long !== null &&
+    geoCode?.long !== undefined;
+  const startSearch = useQuery({
+    queryKey: [
+      "cmsHotelSearchStart",
+      cityMeta?.destinationId,
+      geoCode?.lat,
+      geoCode?.long,
+      cityMeta?.countryCode,
+    ],
+    queryFn: async () => {
+      const today = dayjs();
+      return startCMSHotelSearchApi({
+        locationId: cityMeta.destinationId,
+        geoCode,
+        checkIn: today.format("YYYY-MM-DD"),
+        checkOut: today.add(1, "day").format("YYYY-MM-DD"),
+        rooms: [{ adults: 1, children: 0, childAges: [] }],
+        destinationCountryCode: cityMeta.countryCode,
+      });
+    },
+    enabled: Boolean(cityMeta?.destinationId && hasCoordinates),
+    staleTime: 5 * 60 * 1000,
+  });
+  const resultsQuery = useQuery({
+    queryKey: [
+      "cmsHotelSearchResults",
+      startSearch.data?.searchId,
+      debouncedSearchText,
+    ],
+    queryFn: () =>
+      getCMSHotelSearchResultsApi({
+        searchId: startSearch.data.searchId,
+        page: 1,
+        limit: 5000,
+        hotelName: debouncedSearchText,
+      }),
+    enabled: Boolean(startSearch.data?.searchId),
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+    refetchInterval: (query) => {
+      const result = query.state.data;
+      const status = result?.status?.toLowerCase();
+      const contentStatus = result?.contentStatus?.toLowerCase();
+      const rateStatus = result?.rateStatus?.toLowerCase();
+      const hasCompletePage =
+        Array.isArray(result?.items) && result?.pagination?.hasMore === false;
+      const pendingStatuses = [
+        "processing",
+        "pending",
+        "queued",
+        "starting",
+        "running",
+      ];
+      const isProcessing = [status, contentStatus, rateStatus].some((value) =>
+        pendingStatuses.includes(value),
+      );
 
-  useEffect(() => {
-    loadHotels();
-  }, [
-    cityMeta?.destinationId,
-    cityMeta?.city,
-    cityMeta?.destination,
-    cityMeta?.state,
-    cityMeta?.stateName,
-    cityMeta?.country,
-  ]);
+      return isProcessing && !hasCompletePage ? 2000 : false;
+    },
+    refetchIntervalInBackground: false,
+  });
+  const hotels = resultsQuery.data?.items || [];
+  const loading = startSearch.isLoading || resultsQuery.isFetching;
+  const searchError = startSearch.error || resultsQuery.error;
+  const backendError = resultsQuery.data?.error;
+
+  const options = hotels
+    .map((hotel) => {
+      const supplierHotelId = hotel?.supplierHotelId;
+      const hotelName = hotel?.name;
+      if (!supplierHotelId || !hotelName) return null;
+
+      return {
+        label: `${hotelName}${hotel?.starRating ? ` - ${hotel.starRating} stars` : ""}`,
+        value: supplierHotelId,
+        hotel,
+      };
+    })
+    .filter(Boolean)
+    .filter((option) =>
+      option.label.toLowerCase().includes(searchText.trim().toLowerCase()),
+    );
 
   const handleHotelChange = (value) => {
     const selectedHotel = options.find(
@@ -104,56 +121,65 @@ export default function CMSHotelSelector({ form }) {
     }
 
     const hotel = selectedHotel.hotel || {};
-    const hotelId =
-      hotel?.id || hotel?.hotelId || hotel?.HotelId || selectedHotel.value;
-    const hotelName =
-      hotel?.hotelName ||
-      hotel?.name ||
-      hotel?.HotelName ||
-      selectedHotel.label;
+    const hotelName = hotel?.name || selectedHotel.label;
 
-    form.setFieldValue("entityId", hotelId);
-    form.setFieldValue("selectedHotel", hotelId);
+    form.setFieldValue("entityId", selectedHotel.value);
+    form.setFieldValue("selectedHotel", selectedHotel.value);
     form.setFieldValue(["data", "hotelMeta"], {
-      hotelId,
       hotelName,
+      supplierHotelId: selectedHotel.value,
+      image: hotel?.heroImage || hotel?.images?.[0] || "",
+      images: hotel?.images || [],
+      starRating: hotel?.starRating ?? null,
+      address: hotel?.address || "",
+      city: cityMeta?.city || cityMeta?.destination || "",
+      stateName: cityMeta?.stateName || "",
+      country: hotel?.country || "",
+      rating: hotel?.userReview?.rating ?? null,
+      reviews: hotel?.userReview?.count ?? null,
+      amenities: hotel?.facilities || [],
+      priceRange: hotel?.price?.totalPrice
+        ? `${hotel.price.currency || ""} ${hotel.price.totalPrice}`.trim()
+        : "",
     });
-
-    console.log(
-      "CMS FORM HOTEL META:",
-      form.getFieldValue(["data", "hotelMeta"]),
-    );
   };
 
   return (
-    <Form.Item
-      label={<span className="font-bold">Select Hotel</span>}
-      name="selectedHotel"
-      rules={[
-        {
-          required: true,
-        },
-      ]}
-    >
-      <Select
-        showSearch
-        loading={loading}
-        disabled={!cityMeta?.destinationId}
-        placeholder={
-          !cityMeta?.destinationId
-            ? "Select city first"
-            : loading
-              ? "Loading hotels..."
-              : "Select hotel"
-        }
-        options={options}
-        virtual
-        listHeight={320}
-        filterOption={false}
-        onSearch={loadHotels}
-        notFoundContent={loading ? <Spin size="small" /> : "No hotels found"}
-        onChange={handleHotelChange}
-      />
-    </Form.Item>
+    <div>
+      <Form.Item
+        label={<span className="font-bold">Select Hotel</span>}
+        name="selectedHotel"
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+      >
+        <Select
+          showSearch
+          loading={loading}
+          disabled={!cityMeta?.destinationId || !hasCoordinates}
+          placeholder={
+            !cityMeta?.destinationId || !hasCoordinates
+              ? "Select city first"
+              : loading
+                ? "Loading hotels..."
+                : "Select hotel"
+          }
+          options={options}
+          virtual
+          listHeight={320}
+          filterOption={false}
+          onSearch={setSearchText}
+          notFoundContent={loading ? <Spin size="small" /> : "No hotels found"}
+          onChange={handleHotelChange}
+        />
+      </Form.Item>
+      {(searchError || backendError) && (
+        <div role="alert" className="mt-1 text-sm text-red-600">
+          {searchError?.message || backendError || "Hotel search failed. Try selecting the destination again."}
+        </div>
+      )}
+    </div>
   );
 }

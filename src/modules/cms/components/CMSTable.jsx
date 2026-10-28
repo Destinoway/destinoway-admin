@@ -1,12 +1,13 @@
 "use client";
 
 import {
-  CopyOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
+    CopyOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
 } from "@ant-design/icons";
 import { App, Button, Empty, Popconfirm, Table, Tag, Tooltip } from "antd";
+import { buildFrontendUrl } from "../utils/cmsUrl";
 
 export default function CMSTable({
   pages,
@@ -22,13 +23,9 @@ export default function CMSTable({
 }) {
   const { message } = App.useApp();
 
-  const BASE_URL = (
-    process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
-
   const handleCopyUrl = async (url) => {
     try {
-      await navigator.clipboard.writeText(`${BASE_URL}${url}`);
+      await navigator.clipboard.writeText(buildFrontendUrl(url));
       message.success("URL copied successfully");
     } catch {
       message.error("Failed to copy URL");
@@ -64,7 +61,7 @@ export default function CMSTable({
                 maxWidth: 200,
               }}
             >
-              /{val}
+              {record.url || `/${val}`}
             </span>
 
             <Tooltip title="Copy URL">
@@ -72,6 +69,7 @@ export default function CMSTable({
                 type="text"
                 size="small"
                 icon={<CopyOutlined />}
+                disabled={!record.url}
                 onClick={() => handleCopyUrl(record.url)}
               />
             </Tooltip>
@@ -96,7 +94,7 @@ export default function CMSTable({
       title: "Updated",
       dataIndex: "updatedAt",
       width: 140,
-      render: (val) => new Date(val).toLocaleDateString("en-IN"),
+      render: (val) => (val ? new Date(val).toLocaleDateString("en-IN") : "-"),
     },
     ...(canEdit || canDelete
       ? [
@@ -127,8 +125,10 @@ export default function CMSTable({
                 <Tooltip title="Preview">
                   <Button
                     icon={<EyeOutlined />}
-                    href={`${BASE_URL}${record.url}?preview=true`}
+                    href={buildFrontendUrl(record.url, { preview: true })}
+                    disabled={!record.url}
                     target="_blank"
+                    rel="noopener noreferrer"
                   />
                 </Tooltip>
 

@@ -14,10 +14,53 @@ export const getCMSPagesApi = async (params = {}) => {
 };
 
 /*
+METADATA DUPLICATE CHECK
+Returns { metaTitle?, metaDescription? } each as { value, duplicate, count, pages }.
+*/
+export const checkCMSMetadataApi = async ({
+  metaTitle,
+  metaDescription,
+  excludeId,
+}) => {
+  const res = await api.get("/cms/metadata/check", {
+    params: {
+      ...(metaTitle ? { metaTitle } : {}),
+      ...(metaDescription ? { metaDescription } : {}),
+      ...(excludeId ? { excludeId } : {}),
+    },
+    skipToast: true,
+    skipLoader: true,
+  });
+
+  return res?.data?.data || {};
+};
+
+/*
+REDIRECT HISTORY
+Returns [{ fromPath, toPath, statusCode, createdAt, updatedAt }].
+*/
+export const getCMSRedirectsApi = async (id) => {
+  const res = await api.get(`/cms/${id}/redirects`, {
+    skipToast: true,
+    skipLoader: true,
+  });
+
+  return res?.data?.data || [];
+};
+
+/*
 GET SINGLE
 */
 export const getCMSPageApi = async (id) => {
   const res = await api.get(`/cms/${id}`, {
+    skipToast: true,
+  });
+
+  return res?.data?.data || null;
+};
+
+export const getCMSPageBySlugApi = async (slug) => {
+  const res = await api.get(`/cms/page/${encodeURIComponent(slug)}`, {
     skipToast: true,
   });
 
