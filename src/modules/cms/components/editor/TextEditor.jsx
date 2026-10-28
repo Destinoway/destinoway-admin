@@ -1,6 +1,7 @@
 "use client";
 
 import Color from "@tiptap/extension-color";
+import { mergeAttributes } from "@tiptap/core";
 import Highlight from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import Link from "@tiptap/extension-link";
@@ -33,6 +34,64 @@ import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import HtmlSourceEditor from "./HtmlSourceEditor";
 import TiptapToolbar from "./TiptapToolbar";
+
+const CmsImage = Image.extend({
+  addAttributes() {
+    const parentAttributes = this.parent?.() || {};
+
+    return {
+      ...parentAttributes,
+      width: {
+        ...parentAttributes.width,
+        parseHTML: (element) =>
+          Number.parseFloat(element.style.width) ||
+          Number.parseFloat(element.getAttribute("width")) ||
+          null,
+        renderHTML: ({ width }) =>
+          width ? { width, style: `width: ${width}px` } : {},
+      },
+      height: {
+        ...parentAttributes.height,
+        parseHTML: (element) =>
+          Number.parseFloat(element.style.height) ||
+          Number.parseFloat(element.getAttribute("height")) ||
+          null,
+        renderHTML: ({ height }) =>
+          height ? { height, style: `height: ${height}px` } : {},
+      },
+      rotation: {
+        default: 0,
+        parseHTML: (element) => {
+          const match = element.style.transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/);
+          return match ? Number(match[1]) : 0;
+        },
+        renderHTML: ({ rotation }) =>
+          rotation ? { style: `transform: rotate(${rotation}deg)` } : {},
+      },
+      layout: {
+        default: "block",
+        parseHTML: (element) =>
+          ["left", "right"].includes(element.style.float)
+            ? element.style.float
+            : "block",
+        renderHTML: ({ layout }) => {
+          if (layout === "left") {
+            return { style: "display: block; float: left; margin: 0 16px 12px 0" };
+          }
+          if (layout === "right") {
+            return { style: "display: block; float: right; margin: 0 0 12px 16px" };
+          }
+          return { style: "display: block; float: none; margin: 10px 0" };
+        },
+      },
+    };
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
+  },
+});
+
 export default function TextEditor({ value = "", onChange }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [htmlMode, setHtmlMode] = useState(false);
@@ -76,10 +135,16 @@ export default function TextEditor({ value = "", onChange }) {
 
       HorizontalRule,
 
-      Image.configure({
+      CmsImage.configure({
         inline: false,
-
         allowBase64: false,
+        resize: {
+          enabled: true,
+          directions: ["top-left", "top-right", "bottom-left", "bottom-right"],
+          minWidth: 80,
+          minHeight: 60,
+          alwaysPreserveAspectRatio: true,
+        },
       }),
 
       Table.configure({

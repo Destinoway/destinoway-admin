@@ -1680,9 +1680,14 @@ import {
     UnderlineOutlined,
     UndoOutlined,
     UnorderedListOutlined,
+    InboxOutlined,
 } from "@ant-design/icons";
 
-import { Button, Divider, Dropdown, Select, Space, Tooltip } from "antd";
+import { App, Button, Divider, Dropdown, Input, Modal, Select, Space, Tabs, Tooltip, Upload } from "antd";
+import { useState } from "react";
+import { uploadMediaApi } from "../../api/cms.service";
+
+const { Dragger } = Upload;
 
 export default function TiptapToolbar({
   editor,
@@ -1690,6 +1695,17 @@ export default function TiptapToolbar({
   onToggleHtml,
   onFullscreen,
 }) {
+  const { message } = App.useApp();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageSource, setImageSource] = useState("upload");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageAlt, setImageAlt] = useState("");
+  const [imageRotation, setImageRotation] = useState(0);
+  const [imageLayout, setImageLayout] = useState("block");
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageTarget, setImageTarget] = useState(null);
+
   if (!editor) {
     return null;
   }
@@ -2117,23 +2133,75 @@ export default function TiptapToolbar({
   const addImage = () => {
     const currentImage = editor.isActive("image");
     const currentAttributes = editor.getAttributes("image");
-    const url = window.prompt(
-      "Image URL",
-      currentAttributes.src || "https://",
-    );
+    const position = editor.state.selection.from;
+    setImageTarget({
+      from: position,
+      to: currentImage ? position + 1 : position,
+      width: currentAttributes.width || null,
+      height: currentAttributes.height || null,
+    });
+    setImageUrl(currentAttributes.src || "");
+    setImageAlt(currentAttributes.alt || "");
+    setImageRotation(currentAttributes.rotation || 0);
+    setImageLayout(currentAttributes.layout || "block");
+    setImageFile(null);
+    setImageSource("upload");
+    setImageModalOpen(true);
+  };
 
-    if (!url) {
+  const insertImage = (src) => {
+    if (!src || !imageTarget) return;
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(
+        { from: imageTarget.from, to: imageTarget.to },
+        {
+          type: "image",
+          attrs: {
+            src,
+            alt: imageAlt.trim(),
+            width: imageTarget.width,
+            height: imageTarget.height,
+            rotation: imageRotation,
+            layout: imageLayout,
+          },
+        },
+      )
+      .run();
+    setImageModalOpen(false);
+  };
+
+  const saveImage = async () => {
+    if (imageSource === "url") {
+      if (!imageUrl.trim()) {
+        message.error("Please enter an image URL.");
+        return;
+      }
+      insertImage(imageUrl.trim());
       return;
     }
 
-    const alt = window.prompt("Image ALT text", currentAttributes.alt || "");
-    if (alt === null) return;
+    if (!imageFile) {
+      message.error("Select or drop an image to upload.");
+      return;
+    }
 
-    const chain = editor.chain().focus();
-    if (currentImage) {
-      chain.updateAttributes("image", { src: url.trim(), alt: alt.trim() }).run();
-    } else {
-      chain.setImage({ src: url.trim(), alt: alt.trim() }).run();
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      formData.append("folder", "cms");
+      const response = await uploadMediaApi(formData);
+      const uploadedUrl = response?.data?.url || response?.url;
+      if (!uploadedUrl) throw new Error("Image URL not found in upload response");
+      insertImage(uploadedUrl);
+      message.success("Image uploaded");
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      message.error("Image upload failed");
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -2466,9 +2534,94 @@ export default function TiptapToolbar({
 
       {/* IMAGE */}
 
-      <Tooltip title="Add or edit image URL and ALT text">
+      <Tooltip title="Upload an image or insert it from a URL">
         <Button icon={<PictureOutlined />} onClick={addImage} />
       </Tooltip>
+
+      <Modal
+        title="Insert image"
+        open={imageModalOpen}
+        onCancel={() => setImageModalOpen(false)}
+        onOk={saveImage}
+        okText={imageSource === "upload" ? "Upload and insert" : "Insert image"}
+        confirmLoading={imageUploading}
+        destroyOnHidden
+      >
+        <Tabs
+          activeKey={imageSource}
+          onChange={setImageSource}
+          items={[
+            {
+              key: "upload",
+              label: "Upload image",
+              children: (
+                <Dragger
+                  accept="image/*"
+                  maxCount={1}
+                  multiple={false}
+                  beforeUpload={(file) => {
+                    if (!file.type.startsWith("image/")) {
+                      message.error("Only image files are allowed.");
+                      return Upload.LIST_IGNORE;
+                    }
+                    setImageFile(file);
+                    return false;
+                  }}
+                  onRemove={() => setImageFile(null)}
+                  fileList={imageFile ? [imageFile] : []}
+                >
+                  <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+                  <p className="ant-upload-text">Click or drag an image here</p>
+                  <p className="ant-upload-hint">The image will be uploaded to the CMS media storage.</p>
+                </Dragger>
+              ),
+            },
+            {
+              key: "url",
+              label: "Image URL",
+              children: (
+                <Input
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                />
+              ),
+            },
+          ]}
+        />
+        <Input
+          value={imageAlt}
+          onChange={(event) => setImageAlt(event.target.value)}
+          placeholder="Alt text (optional)"
+          aria-label="Image alt text"
+          style={{ marginTop: 12 }}
+        />
+        <Space style={{ display: "flex", marginTop: 12 }}>
+          <Select
+            aria-label="Image rotation"
+            value={imageRotation}
+            onChange={setImageRotation}
+            style={{ width: 150 }}
+            options={[
+              { value: 0, label: "No rotation" },
+              { value: 90, label: "Rotate 90°" },
+              { value: 180, label: "Rotate 180°" },
+              { value: 270, label: "Rotate 270°" },
+            ]}
+          />
+          <Select
+            aria-label="Image layout"
+            value={imageLayout}
+            onChange={setImageLayout}
+            style={{ flex: 1 }}
+            options={[
+              { value: "block", label: "Image above/below text" },
+              { value: "left", label: "Image left, text wraps right" },
+              { value: "right", label: "Image right, text wraps left" },
+            ]}
+          />
+        </Space>
+      </Modal>
 
       {/* TABLE */}
 
