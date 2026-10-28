@@ -7,9 +7,11 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
-import { Modal, theme } from "antd";
+import { Button, Modal, Space, Tooltip, theme } from "antd";
+import { RotateRightOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
 import {
@@ -69,19 +71,30 @@ const CmsImage = Image.extend({
           rotation ? { style: `transform: rotate(${rotation}deg)` } : {},
       },
       layout: {
-        default: "block",
-        parseHTML: (element) =>
-          ["left", "right"].includes(element.style.float)
-            ? element.style.float
-            : "block",
+        default: "center",
+        parseHTML: (element) => {
+          const layout = element.getAttribute("data-image-layout");
+          if (["left", "center", "right"].includes(layout)) return layout;
+          if (["left", "right"].includes(element.style.float)) return element.style.float;
+          return "center";
+        },
         renderHTML: ({ layout }) => {
           if (layout === "left") {
-            return { style: "display: block; float: left; margin: 0 16px 12px 0" };
+            return {
+              "data-image-layout": layout,
+              style: "display: block; float: left; margin: 0 16px 12px 0",
+            };
           }
           if (layout === "right") {
-            return { style: "display: block; float: right; margin: 0 0 12px 16px" };
+            return {
+              "data-image-layout": layout,
+              style: "display: block; float: right; margin: 0 0 12px 16px",
+            };
           }
-          return { style: "display: block; float: none; margin: 10px 0" };
+          return {
+            "data-image-layout": "center",
+            style: "display: block; float: none; margin: 10px auto",
+          };
         },
       },
     };
@@ -89,6 +102,55 @@ const CmsImage = Image.extend({
 
   renderHTML({ HTMLAttributes }) {
     return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
+  },
+
+  addNodeView() {
+    const createNodeView = this.parent?.();
+
+    return (props) => {
+      const nodeView = createNodeView?.(props);
+      if (!nodeView) return nodeView;
+
+      const dom = nodeView.dom;
+      const syncImageStyles = (node) => {
+        const layout = node.attrs.layout || "center";
+        const image = dom.querySelector("img");
+
+        dom.dataset.imageLayout = layout;
+        dom.style.width = "max-content";
+        dom.style.maxWidth = "100%";
+        dom.style.float = layout === "left" || layout === "right" ? layout : "none";
+        dom.style.margin =
+          layout === "left"
+            ? "0 16px 12px 0"
+            : layout === "right"
+              ? "0 0 12px 16px"
+              : "10px auto";
+
+        if (image) {
+          image.dataset.imageLayout = layout;
+          image.style.float = "none";
+          image.style.transform = node.attrs.rotation
+            ? `rotate(${node.attrs.rotation}deg)`
+            : "";
+        }
+      };
+
+      syncImageStyles(props.node);
+
+      return {
+        dom,
+        contentDOM: nodeView.contentDOM,
+        update(node, decorations, innerDecorations) {
+          const updated = nodeView.update?.(node, decorations, innerDecorations);
+          if (updated) syncImageStyles(node);
+          return updated;
+        },
+        destroy() {
+          nodeView.destroy?.();
+        },
+      };
+    };
   },
 });
 
@@ -169,6 +231,48 @@ export default function TextEditor({ value = "", onChange }) {
       onChange?.(editor.getHTML());
     },
   });
+
+  const selectedImage = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) =>
+      currentEditor?.isActive("image")
+        ? currentEditor.getAttributes("image")
+        : null,
+  });
+
+  const startImageRotation = (event) => {
+    event.preventDefault();
+    if (event.button !== 0) return;
+    const nodeDOM = editor.view.nodeDOM(editor.state.selection.from);
+    const image = nodeDOM?.matches?.("img") ? nodeDOM : nodeDOM?.querySelector?.("img");
+    if (!image) return;
+
+    const bounds = image.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const pointerAngle = (pointerEvent) =>
+      Math.atan2(pointerEvent.clientY - centerY, pointerEvent.clientX - centerX) *
+      (180 / Math.PI);
+    const startAngle = pointerAngle(event);
+    const originalRotation = Number(selectedImage?.rotation || 0);
+
+    const handleMove = (pointerEvent) => {
+      const delta = pointerAngle(pointerEvent) - startAngle;
+      const normalizedDelta = ((delta + 540) % 360) - 180;
+      const rotation =
+        (Math.round(originalRotation + normalizedDelta) % 360 + 360) % 360;
+      editor.commands.updateAttributes("image", { rotation });
+    };
+    const handleEnd = () => {
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleEnd);
+      document.removeEventListener("pointercancel", handleEnd);
+    };
+
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleEnd);
+    document.addEventListener("pointercancel", handleEnd);
+  };
 
   useEffect(() => {
     if (!editor) {
@@ -278,6 +382,55 @@ export default function TextEditor({ value = "", onChange }) {
         }
       >
         <EditorContent editor={editor} />
+        <BubbleMenu
+          editor={editor}
+          shouldShow={({ editor: currentEditor }) =>
+            currentEditor.isActive("image")
+          }
+          options={{ placement: "top" }}
+        >
+          <Space className="tiptap-image-controls" size={4}>
+            <Tooltip title="Drag to rotate image">
+              <Button
+                size="small"
+                className="tiptap-rotate-handle"
+                aria-label="Drag to rotate image"
+                icon={<RotateRightOutlined />}
+                onPointerDown={startImageRotation}
+              />
+            </Tooltip>
+            <Button
+              size="small"
+              type={selectedImage?.layout === "left" ? "primary" : "default"}
+              aria-label="Align image left and wrap text"
+              onClick={() =>
+                editor.chain().focus().updateAttributes("image", { layout: "left" }).run()
+              }
+            >
+              Image left
+            </Button>
+            <Button
+              size="small"
+              type={selectedImage?.layout === "right" ? "primary" : "default"}
+              aria-label="Align image right and wrap text"
+              onClick={() =>
+                editor.chain().focus().updateAttributes("image", { layout: "right" }).run()
+              }
+            >
+              Image right
+            </Button>
+            <Button
+              size="small"
+              type={selectedImage?.layout === "center" ? "primary" : "default"}
+              aria-label="Center image"
+              onClick={() =>
+                editor.chain().focus().updateAttributes("image", { layout: "center" }).run()
+              }
+            >
+              Center
+            </Button>
+          </Space>
+        </BubbleMenu>
       </div>
     );
   };
