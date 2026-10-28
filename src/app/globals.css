@@ -1127,6 +1127,314 @@ body.dark .ant-menu-item-selected {
 }
 
 /* =========================================================
+   ROLE FORM & STAFF DRAWER
+   ========================================================= */
+
+.role-form-page .role-details-card,
+.role-form-page .role-permission-card {
+  border-color: #e4edf0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 4%);
+}
+
+.role-form-page .role-details-card .ant-card-head {
+  min-height: 54px;
+  border-bottom-color: #edf2f4;
+}
+
+.role-form-page .role-permission-card {
+  height: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.role-form-page .role-permission-card:hover {
+  border-color: #99d6cd;
+  box-shadow: 0 8px 22px rgb(15 118 110 / 8%);
+}
+
+.role-form-page .role-permission-item .ant-checkbox-wrapper {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 9px;
+  border: 1px solid #e8eef0;
+  border-radius: 9px;
+  background: #f8fafb;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.role-form-page .role-permission-item .ant-checkbox-wrapper:hover {
+  border-color: #8bcfc5;
+  background: #f0fdfa;
+}
+
+.role-form-actions {
+  padding-top: 18px;
+  border-top: 1px solid #e8eef0;
+}
+
+.staff-form-drawer .ant-drawer-header {
+  padding: 22px 24px;
+}
+
+.staff-form-drawer .ant-drawer-footer {
+  border-top-color: #e8eef0;
+}
+
+body.dark .role-form-page .role-details-card,
+body.dark .role-form-page .role-permission-card {
+  border-color: #263940;
+  background: #102027;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 14%);
+}
+
+body.dark .role-form-page .role-details-card .ant-card-head,
+body.dark .role-form-actions,
+body.dark .staff-form-drawer .ant-drawer-footer {
+  border-color: #263940;
+}
+
+body.dark .role-form-page .role-permission-item .ant-checkbox-wrapper {
+  border-color: #2b4249;
+  background: #142a31;
+}
+
+body.dark .role-form-page .role-permission-item .ant-checkbox-wrapper:hover {
+  border-color: #3a8279;
+  background: #17343a;
+}
+
+body.dark .staff-form-drawer .ant-drawer-header {
+  border-bottom-color: #263940;
+}
+
+body.dark .staff-form-drawer .ant-drawer-body {
+  background: #102027;
+}
+
+/* =========================================================
+   STAFF & ROLE MANAGEMENT TABLES
+   ========================================================= */
+
+.management-page-card .ant-card-head {
+  min-height: 76px;
+  border-bottom-color: #edf2f4;
+  padding-inline: 22px;
+}
+
+.management-page-card .ant-card-body {
+  padding: 18px 22px 20px;
+}
+
+.management-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.management-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.management-table .ant-table-tbody > tr:hover > td {
+  background: #f0fdfa !important;
+}
+
+.management-table .ant-btn {
+  box-shadow: none;
+}
+
+body.dark .management-page-card .ant-card-head {
+  border-bottom-color: #263940;
+}
+
+body.dark .management-table .ant-table-thead > tr > th {
+  border-color: #263940;
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .management-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .management-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+body.dark .management-table .ant-table-cell-fix-left,
+body.dark .management-table .ant-table-cell-fix-right {
+  background: #102027;
+}
+
+/* =========================================================
+   BOOKING DETAILS PAGE
+   ========================================================= */
+
+.booking-detail-page > .ant-card {
+  border: 1px solid #e8eef0;
+  border-radius: 18px;
+  box-shadow: 0 6px 22px rgb(15 23 42 / 4%);
+}
+
+.booking-detail-page > .ant-card .ant-card-head {
+  min-height: 62px;
+  border-bottom-color: #edf2f4;
+}
+
+.booking-detail-summary-card {
+  border: 1px solid #e8eef0 !important;
+  background: #fff;
+}
+
+.booking-detail-descriptions .ant-descriptions-item-label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.booking-detail-descriptions .ant-descriptions-item-content {
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.booking-detail-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.booking-detail-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+}
+
+.booking-technical-collapse {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+body.dark .booking-detail-page > .ant-card {
+  border-color: #263940;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+}
+
+body.dark .booking-detail-page > .ant-card .ant-card-head {
+  border-bottom-color: #263940;
+}
+
+body.dark .booking-detail-summary-card {
+  border-color: #263940 !important;
+  background: #102027;
+}
+
+body.dark .booking-detail-descriptions .ant-descriptions-item-label {
+  color: #94a3b8;
+}
+
+body.dark .booking-detail-descriptions .ant-descriptions-item-content {
+  color: #e2e8f0;
+}
+
+body.dark .booking-detail-table .ant-table-thead > tr > th {
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .booking-detail-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .booking-detail-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+/* =========================================================
+   HOTEL BOOKINGS TABLE
+   ========================================================= */
+
+.booking-tabs-wrap {
+  overflow-x: auto;
+}
+
+.booking-status-tabs {
+  min-width: max-content;
+}
+
+.booking-status-tabs .ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+.booking-status-tabs .ant-tabs-tab {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.booking-status-tabs .ant-tabs-tab-active .booking-tab-label {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.booking-table .ant-table-thead > tr > th {
+  background: #f5f9fa;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.booking-table .ant-table-tbody > tr > td {
+  border-bottom-color: #edf2f4;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.booking-table .ant-table-tbody > tr:hover > td {
+  background: #f0fdfa !important;
+}
+
+body.dark .booking-status-tabs .ant-tabs-tab-active .booking-tab-label {
+  color: #5eead4;
+}
+
+body.dark .booking-tabs-wrap {
+  border-color: #263940 !important;
+}
+
+body.dark .booking-table .ant-table-thead > tr > th {
+  border-color: #263940;
+  background: #172e35;
+  color: #a8bbc0;
+}
+
+body.dark .booking-table .ant-table-tbody > tr > td {
+  border-bottom-color: #263940;
+  background: #102027;
+  color: #d4e0e3;
+}
+
+body.dark .booking-table .ant-table-tbody > tr:hover > td {
+  background: #17343a !important;
+}
+
+body.dark .booking-table .ant-table-cell-fix-left,
+body.dark .booking-table .ant-table-cell-fix-right {
+  background: #102027;
+}
+
+/* =========================================================
    MODAL
    ========================================================= */
 

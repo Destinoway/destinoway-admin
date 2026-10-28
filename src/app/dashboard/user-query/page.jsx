@@ -8,6 +8,7 @@ import { useUpdateContactStatus } from "@/modules/User-Query/hook/useUpdateConta
 import { EyeOutlined } from "@ant-design/icons";
 import {
   App,
+  Alert,
   Button,
   Card,
   Empty,
@@ -39,12 +40,15 @@ export default function CustomersPage() {
   const setScrollLocked = useDashboardUIStore((state) => state.setScrollLocked);
 
   // FIRST: query call
-  const { data, isLoading } = useContactQuery({
-    search: debouncedSearch,
-    page,
-    limit,
-    status,
-  });
+  const { data, isLoading, isError, error } = useContactQuery(
+    {
+      search: debouncedSearch,
+      page,
+      limit,
+      status,
+    },
+    canFetch,
+  );
 
   // SECOND: mutation
   const { mutate: updateStatus, isPending } = useUpdateContactStatus();
@@ -256,23 +260,43 @@ export default function CustomersPage() {
             }}
           />
 
-          <Table
-            loading={isLoading}
-            columns={columns}
-            dataSource={customers}
-            rowKey="_id"
-            scroll={{ x: 1600 }}
-            pagination={{
-              current: page,
-              pageSize: limit,
-              total: data?.data?.pagination?.total,
-              showSizeChanger: true,
-              onChange: (page, size) => {
-                setPage(page);
-                setLimit(size);
-              },
-            }}
-          />
+          {isError ? (
+            <Alert
+              type="error"
+              showIcon
+              message="Could not load user queries"
+              description={
+                error?.response?.data?.message ||
+                "Please try again in a moment."
+              }
+            />
+          ) : (
+            <Table
+              loading={isLoading}
+              columns={columns}
+              dataSource={customers}
+              rowKey="_id"
+              scroll={{ x: 1600 }}
+              locale={{
+                emptyText: (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No data found"
+                  />
+                ),
+              }}
+              pagination={{
+                current: page,
+                pageSize: limit,
+                total: data?.data?.pagination?.total || 0,
+                showSizeChanger: true,
+                onChange: (page, size) => {
+                  setPage(page);
+                  setLimit(size);
+                },
+              }}
+            />
+          )}
         </div>
       ) : (
         <Empty description="No permission to view data" />

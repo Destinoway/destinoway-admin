@@ -52,18 +52,18 @@ export default function RolesPage() {
       width: 260,
 
       render: (_, record) => (
-        <div className="flex flex-col gap-1">
-          <Text strong className="text-sm">
-            {record?.name}
-          </Text>
-          {record?.isSystemRole && (
-            <Tag
-              color="gold"
-              className="!m-0 !w-fit !rounded-full !text-[11px] !font-medium"
-            >
-              System Role
-            </Tag>
-          )}
+        <div className="flex min-w-[170px] items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-sm font-bold uppercase text-indigo-700">
+            {record?.name?.slice(0, 1) || "R"}
+          </span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <Text strong className="!text-sm">{record?.name || "Unnamed role"}</Text>
+            {record?.isSystemRole && (
+              <Tag color="gold" className="!m-0 !w-fit !rounded-full !text-[10px] !font-medium">
+                System role
+              </Tag>
+            )}
+          </div>
         </div>
       ),
     },
@@ -173,7 +173,8 @@ export default function RolesPage() {
                 {/* EDIT */}
 
                 <Tooltip title="Edit Role">
-                  <Button
+              <Button
+                    className="!rounded-lg"
                     icon={<EditOutlined />}
                     onClick={() =>
                       router.push(
@@ -216,7 +217,7 @@ export default function RolesPage() {
                     onConfirm={() => handleDelete(record)}
                   >
                     <Tooltip title="Delete Role">
-                      <Button danger icon={<DeleteOutlined />} />
+                      <Button danger className="!rounded-lg" icon={<DeleteOutlined />} />
                     </Tooltip>
                   </Popconfirm>
                 )}
@@ -230,7 +231,7 @@ export default function RolesPage() {
   return (
     <>
       <Card
-        className="!rounded-[5px]"
+        className="management-page-card !rounded-2xl !border-0 !shadow-sm"
         styles={{
           body: {
             paddingTop: 18,
@@ -262,20 +263,17 @@ export default function RolesPage() {
       >
         {canFetch ? (
           <Table
+            className="management-table role-management-table"
             columns={columns}
             dataSource={roles}
             rowKey="_id"
             loading={isLoading}
-            bordered
             size="middle"
-            // scroll={{
-            //   x: 920,
-            // }}
+            scroll={{ x: 900 }}
             pagination={{
-              pageSize: 8,
-
-              showSizeChanger: false,
-
+              pageSize: 10,
+              showSizeChanger: true,
+              pageSizeOptions: ["10", "20", "50"],
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total}`,
 

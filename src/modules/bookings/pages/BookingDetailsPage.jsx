@@ -3,7 +3,6 @@
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
   CreditCardOutlined,
   DollarOutlined,
   EnvironmentOutlined,
@@ -102,9 +101,9 @@ const displayValue = (value) => {
 
 const descriptions = (entries, columns = 2) => (
   <Descriptions
-    bordered
     size="small"
     column={{ xs: 1, sm: 1, md: columns }}
+    className="booking-detail-descriptions"
     items={entries.map(([key, label, children]) => ({
       key,
       label,
@@ -392,8 +391,30 @@ export default function BookingDetailsPage({ bookingRef }) {
   ].filter(([, value]) => value);
   const currentStatus =
     booking.supplierBookingStatus || booking.itineraryStatus || "pending";
-  const roomCount = roomRows.reduce((total, room) => total + room.count, 0);
-  const guestCount = guests.length;
+  const paymentStatus = booking.paymentStatus || booking.paymentOrderStatus;
+  const hotelAddress =
+    typeof hotel.address === "string"
+      ? hotel.address
+      : [
+          hotel.address?.line1,
+          hotel.address?.line2,
+          hotel.address?.city,
+          hotel.address?.state,
+          hotel.address?.country,
+        ]
+          .filter(Boolean)
+          .join(", ");
+  const roomCount =
+    roomRows.reduce((total, room) => total + Number(room.count || 0), 0) ||
+    priceRoomGroups.reduce((total, room) => total + Number(room.roomCount || 1), 0) ||
+    verifiedGroups.reduce((total, room) => total + Number(room.roomCount || 1), 0);
+  const guestCount =
+    guests.length ||
+    Number(stay.adults || 0) + Number(stay.children || 0) ||
+    verifiedGroups.reduce((total, group) => {
+      const occupancy = group.occupancies?.[0] || {};
+      return total + Number(occupancy.numOfAdults || 0) + Number(occupancy.numOfChildren || 0);
+    }, 0);
   const stayNights =
     stay.checkIn && stay.checkOut
       ? Math.max(
@@ -407,7 +428,7 @@ export default function BookingDetailsPage({ bookingRef }) {
       : 0;
 
   return (
-    <Space orientation="vertical" size="large" className="w-full">
+    <div className="booking-detail-page mx-auto w-full max-w-[1440px] space-y-5 pb-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button
           icon={<ArrowLeftOutlined />}
@@ -457,13 +478,13 @@ export default function BookingDetailsPage({ bookingRef }) {
                 </Space>
               </div>
             </Space>
-            {hotel.address && (
+            {hotelAddress && (
               <Typography.Paragraph
                 type="secondary"
                 className="!mb-0 !mt-4 max-w-3xl"
               >
                 <EnvironmentOutlined className="mr-2 text-[#1677ff]" />
-                {hotel.address}
+                {hotelAddress}
               </Typography.Paragraph>
             )}
           </div>
@@ -477,7 +498,7 @@ export default function BookingDetailsPage({ bookingRef }) {
             >
               {formatStatus(currentStatus)}
             </Tag>
-            <Typography.Text type="secondary">
+            <Typography.Text type="secondary" className="block px-1 text-xs">
               Created {formatDate(booking.createdAt)}
             </Typography.Text>
           </div>
@@ -485,80 +506,44 @@ export default function BookingDetailsPage({ bookingRef }) {
       </Card>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="!h-full !rounded-xl !border-0 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <Typography.Text type="secondary">Booking status</Typography.Text>
-              <Avatar
-                size={36}
-                icon={<CheckCircleOutlined />}
-                className="!bg-emerald-100 !text-emerald-700"
-              />
-            </div>
+        <Col xs={24} sm={12} xl={6}>
+          <Card className="booking-detail-summary-card !h-full !rounded-2xl !border-0 shadow-sm">
             <Statistic
-              value={formatStatus(booking.supplierBookingStatus)}
-              styles={{
-                content: {
-                  color: "#059669",
-                  fontSize: 20,
-                  fontWeight: 600,
-                },
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="!h-full !rounded-xl !border-0 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <Typography.Text type="secondary">Total payable</Typography.Text>
-              <Avatar
-                size={36}
-                icon={<DollarOutlined />}
-                className="!bg-emerald-100 !text-emerald-700"
-              />
-            </div>
-            <Statistic
+              title="Total payable"
               value={formatAmount(price.total, price.currency)}
-              styles={{
-                content: {
-                  color: "#059669",
-                  fontSize: 20,
-                  fontWeight: 600,
-                },
-              }}
+              prefix={<DollarOutlined className="mr-1 text-emerald-600" />}
+              styles={{ content: { color: isDark ? "#6ee7b7" : "#047857", fontSize: 21, fontWeight: 700 } }}
             />
+            <Typography.Text type="secondary" className="!text-xs">{price.currency || "INR"} · taxes and discounts included</Typography.Text>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="!h-full !rounded-xl !border-0 shadow-sm">
-            <Statistic
-              title="Check-in"
-              value={formatDate(stay.checkIn, true)}
-              prefix={<CalendarOutlined className="text-[#1677ff]" />}
-              styles={{
-                content: {
-                  color: "#1677ff",
-                  fontSize: 20,
-                  fontWeight: 600,
-                },
-              }}
-            />
+        <Col xs={24} sm={12} xl={6}>
+          <Card className="booking-detail-summary-card !h-full !rounded-2xl !border-0 shadow-sm">
+            <Typography.Text type="secondary">Stay dates</Typography.Text>
+            <div className="mt-2 flex items-center gap-2">
+              <CalendarOutlined className="text-blue-600" />
+              <span className={`text-sm font-semibold ${isDark ? "text-slate-100" : "text-slate-800"}`}>
+                {formatDate(stay.checkIn, true)} <span className="text-slate-400">→</span> {formatDate(stay.checkOut, true)}
+              </span>
+            </div>
+            <Typography.Text type="secondary" className="!text-xs">{stayNights} night{stayNights === 1 ? "" : "s"}</Typography.Text>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="!h-full !rounded-xl !border-0 shadow-sm">
-            <Statistic
-              title="Check-out"
-              value={formatDate(stay.checkOut, true)}
-              prefix={<CalendarOutlined className="text-[#08979c]" />}
-              styles={{
-                content: {
-                  color: "#08979c",
-                  fontSize: 20,
-                  fontWeight: 600,
-                },
-              }}
-            />
+        <Col xs={24} sm={12} xl={6}>
+          <Card className="booking-detail-summary-card !h-full !rounded-2xl !border-0 shadow-sm">
+            <Typography.Text type="secondary">Rooms & guests</Typography.Text>
+            <div className="mt-2 flex items-center gap-2">
+              <TeamOutlined className="text-violet-600" />
+              <span className={`text-xl font-bold ${isDark ? "text-slate-100" : "text-slate-800"}`}>{roomCount} rooms</span>
+            </div>
+            <Typography.Text type="secondary" className="!text-xs">{guestCount} guest{guestCount === 1 ? "" : "s"} listed</Typography.Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} xl={6}>
+          <Card className="booking-detail-summary-card !h-full !rounded-2xl !border-0 shadow-sm">
+            <Typography.Text type="secondary">Payment status</Typography.Text>
+            <div className="mt-2"><StatusTag value={paymentStatus} /></div>
+            <Typography.Text type="secondary" className="!text-xs">Gateway: {booking.paymentGateway || "Not available"}</Typography.Text>
           </Card>
         </Col>
       </Row>
@@ -630,7 +615,7 @@ export default function BookingDetailsPage({ bookingRef }) {
           ["supplier", "Supplier", booking.supplier],
           ["checkIn", "Check-in", formatDate(stay.checkIn, true)],
           ["checkOut", "Check-out", formatDate(stay.checkOut, true)],
-          ["address", "Hotel address", hotel.address, 2],
+          ["address", "Hotel address", hotelAddress, 2],
           [
             "request",
             "Special service request",
@@ -641,6 +626,7 @@ export default function BookingDetailsPage({ bookingRef }) {
         <div className="mt-4">
           <Typography.Title level={5}>Rooms</Typography.Title>
           <Table
+            className="booking-detail-table"
             size="small"
             rowKey="key"
             pagination={false}
@@ -702,6 +688,7 @@ export default function BookingDetailsPage({ bookingRef }) {
         <div className="mt-4">
           <Typography.Title level={5}>Guests / room occupants</Typography.Title>
           <Table
+            className="booking-detail-table"
             size="small"
             rowKey="key"
             pagination={false}
@@ -834,6 +821,7 @@ export default function BookingDetailsPage({ bookingRef }) {
         <div className="mt-4">
           <Typography.Title level={5}>Room price breakdown</Typography.Title>
           <Table
+            className="booking-detail-table"
             size="small"
             rowKey="key"
             pagination={false}
@@ -849,6 +837,7 @@ export default function BookingDetailsPage({ bookingRef }) {
               Nightly rate breakdown
             </Typography.Title>
             <Table
+              className="booking-detail-table"
               size="small"
               rowKey="key"
               pagination={false}
@@ -920,6 +909,7 @@ export default function BookingDetailsPage({ bookingRef }) {
           <div className="mt-4">
             <Typography.Title level={5}>Cancellation policies</Typography.Title>
             <Table
+              className="booking-detail-table"
               size="small"
               rowKey="key"
               pagination={false}
@@ -938,6 +928,7 @@ export default function BookingDetailsPage({ bookingRef }) {
               Hotel & check-in policies
             </Typography.Title>
             <Table
+              className="booking-detail-table"
               size="small"
               rowKey="key"
               pagination={false}
@@ -970,6 +961,7 @@ export default function BookingDetailsPage({ bookingRef }) {
       )}
 
       <Collapse
+        className="booking-technical-collapse"
         items={[
           {
             key: "technical",
@@ -1013,6 +1005,12 @@ export default function BookingDetailsPage({ bookingRef }) {
                     {jsonPanel(booking.supplierRooms)}
                   </div>
                 )}
+                <div>
+                  <Typography.Title level={5}>
+                    Complete booking record
+                  </Typography.Title>
+                  {jsonPanel(booking)}
+                </div>
               </Space>
             ),
           },
@@ -1023,6 +1021,6 @@ export default function BookingDetailsPage({ bookingRef }) {
         Created {formatDate(booking.createdAt)} · Last updated{" "}
         {formatDate(booking.updatedAt)}
       </Typography.Text>
-    </Space>
+    </div>
   );
 }

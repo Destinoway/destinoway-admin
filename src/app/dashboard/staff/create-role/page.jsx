@@ -137,6 +137,7 @@ export default function RoleForm() {
         <Empty description="No permission to manage roles" />
       ) : (
         <Form
+          className="role-form-page mx-auto w-full max-w-[1440px] pb-6"
           form={form}
           layout="vertical"
           onFinish={onFinish}
@@ -144,17 +145,13 @@ export default function RoleForm() {
             permissions: {},
           }}
         >
-          <div
-            style={{
-              marginBottom: 28,
-            }}
-          >
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <Space align="start" size={14}>
               <div
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 5,
+                  width: 54,
+                  height: 54,
+                  borderRadius: 16,
                   background: "rgba(22,119,255,0.10)",
                   display: "flex",
                   alignItems: "center",
@@ -167,12 +164,7 @@ export default function RoleForm() {
               </div>
 
               <div>
-                <Title
-                  level={3}
-                  style={{
-                    marginBottom: 4,
-                  }}
-                >
+                <Title level={3} style={{ marginBottom: 4 }}>
                   {roleId ? "Edit Role" : "Create Role"}
                 </Title>
 
@@ -191,18 +183,17 @@ export default function RoleForm() {
           {/* ================= BASIC INFO ================= */}
 
           <Card
-            size="small"
-            style={{
-              marginBottom: 22,
-              borderRadius: borderRadiusLG,
-            }}
+            className="role-details-card"
+            title="Role details"
+            extra={<Text type="secondary" className="!text-xs">Name is required</Text>}
+            style={{ marginBottom: 28, borderRadius: borderRadiusLG }}
           >
-            <Row gutter={18}>
+            <Row gutter={[20, 4]} align="top">
               {/* ROLE NAME */}
-              <Col xs={24} md={12}>
+              <Col xs={24} md={9}>
                 <Form.Item
                   name="name"
-                  label="Role Name"
+                  label="Role name"
                   rules={[
                     {
                       required: true,
@@ -220,9 +211,9 @@ export default function RoleForm() {
 
               {/* DESCRIPTION */}
 
-              <Col xs={24} md={12}>
+              <Col xs={24} md={15}>
                 <Form.Item name="description" label="Description">
-                  <TextArea rows={3} placeholder="Enter role description" />
+                  <TextArea rows={3} placeholder="Describe what this role is responsible for" />
                 </Form.Item>
               </Col>
             </Row>
@@ -230,16 +221,7 @@ export default function RoleForm() {
 
           {/* ================= HEADER ================= */}
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-
-              justifyContent: "space-between",
-
-              marginBottom: 18,
-            }}
-          >
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <Space size={10}>
               <LockOutlined
                 style={{
@@ -272,8 +254,9 @@ export default function RoleForm() {
           <div>
             <Row gutter={[16, 16]}>
               {modules.map((module) => (
-                <Col xs={24} sm={12} lg={8} key={module.key}>
+                <Col xs={24} sm={12} xl={8} key={module.key}>
                   <Card
+                    className="role-permission-card"
                     size="small"
                     style={{
                       borderRadius: borderRadiusLG,
@@ -315,7 +298,7 @@ export default function RoleForm() {
                           color: colorPrimary,
                         }}
                       >
-                        {module.actions.length} Actions
+                        {module.actions.filter((action) => action !== "update").length} Actions
                       </div>
                     </div>
 
@@ -327,7 +310,7 @@ export default function RoleForm() {
 
                     {/* ACTIONS */}
 
-                    <div className="flex flex-wrap gap-[10px]">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {module.actions
                         .filter((action) => action !== "update")
                         .map((action) => (
@@ -335,7 +318,7 @@ export default function RoleForm() {
                             key={action}
                             name={["permissions", module.key, action]}
                             valuePropName="checked"
-                            className="!mb-0"
+                            className="role-permission-item !mb-0"
                           >
                             <Checkbox
                               disabled={
@@ -400,17 +383,7 @@ export default function RoleForm() {
 
           {/* ================= FOOTER ================= */}
 
-          <div
-            style={{
-              display: "flex",
-
-              justifyContent: "flex-end",
-
-              gap: 12,
-
-              marginTop: 28,
-            }}
-          >
+          <div className="role-form-actions mt-7 flex justify-end gap-3">
             <Button
               size="large"
               onClick={() => {
